@@ -5,6 +5,7 @@
 #include "tile.hpp"
 
 #include <iostream>
+#include <fstream>
 
 class StateEngine {
 public:
@@ -46,10 +47,8 @@ public:
   void render() {
     this->window->clear();
     
-    this->renderUI();
-
-    //grid
     this->renderBoxes();
+    this->renderUI();
 
     this->window->display();
   }
@@ -66,7 +65,7 @@ private:
   //ui
   sf::RectangleShape sliderOutline;
   sf::RectangleShape sliderBox;
-  sf::RectangleShape highlightBox;
+  // sf::RectangleShape highlightBox;
   
   //mouse
   sf::Vector2i mousePosView;
@@ -89,8 +88,8 @@ private:
     this->sliderBox.setFillColor(sf::Color::White);
     
     // this->highlightBox.setPosition(sf::Vector2f(-100, -100));
-    this->highlightBox.setSize(sf::Vector2f(50, 50));
-    this->highlightBox.setFillColor(sf::Color(0, 0, 0, 100));
+    // this->highlightBox.setSize(sf::Vector2f(50, 50));
+    // this->highlightBox.setFillColor(sf::Color(100, 100, 100, 100));
     
     int index = 0;
     for (int i=0; i<20; i++)
@@ -121,6 +120,10 @@ private:
         case sf::Event::KeyPressed:
           if (this->event.key.code == sf::Keyboard::Escape)
             this->window->close();
+          if (this->event.key.code == sf::Keyboard::A)
+            this->saveGridToFile("testfromwindow.txt");
+          if (this->event.key.code == sf::Keyboard::A)
+            this->loadGridFromFile("testgrid.txt");
         default: break;
       }
     }
@@ -132,6 +135,14 @@ private:
   }
   
   void updateUI() {
+    // if (sf::Mouse::isButtonPressed(sf::Mouse::Left) || sf::Mouse::isButtonPressed(sf::Mouse::Right))
+    // {
+    //   this->highlightBox.setFillColor(sf::Color::Transparent);
+    // }
+    // else
+    // {
+    //   this->highlightBox.setFillColor(sf::Color(100, 100, 100, 255));
+    // }
     if (this->sliderBox.getGlobalBounds().contains(this->mousePosWindow) && sf::Mouse::isButtonPressed(sf::Mouse::Left))
     {
       this->sliderBox.setPosition(sf::Vector2f(this->mousePosWindow.x, 15));
@@ -142,6 +153,7 @@ private:
   void renderUI() {
     this->window->draw(this->sliderOutline);
     this->window->draw(this->sliderBox);
+    // this->window->draw(this->highlightBox);
   }
   
   void updateTiles() {
@@ -155,7 +167,7 @@ private:
         {
           if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
           {
-            if (currentState == Tile::empty) currentTile->setState(Tile::wall);
+            if (currentState == Tile::empty || currentState == Tile::hovered) currentTile->setState(Tile::wall);
             // else if (currentState == Tile::start || currentState == Tile::end)
           }
           else if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
@@ -164,13 +176,13 @@ private:
           }
           else
           {
-            this->highlightBox.setPosition(sf::Vector2f(currentTile->getBox().getPosition()));
+            currentTile->setState(Tile::hovered);
           }
         }
-        // else
-        // {
-        //   if (currentState == Tile::hovered) currentTile->setState(Tile::empty);
-        // }
+        else
+        {
+          if (currentState == Tile::hovered) currentTile->setState(Tile::empty);
+        }
       }
     }
   }
@@ -183,5 +195,37 @@ private:
         this->window->draw(this->grid[i][j]->getBox());
       }
     }
+  }
+  
+  void saveGridToFile(std::string fileName) {
+    int tileState;
+    std::ofstream file;
+    file.open(fileName);
+
+    for (int i=0; i<20; i++)
+    {
+      for (int j=0; j<20; j++)
+      {
+        file << this->grid[j][i]->state << " ";
+      }
+      file << std::endl;
+    }
+    file.close();
+  }
+  
+  void loadGridFromFile(std::string fileName) {
+    int fileState;
+    std::ifstream file;
+    file.open(fileName);
+
+    for (int i=0; i<20; i++)
+    {
+      for (int j=0; j<20; j++)
+      {
+        file >> fileState;
+        this->grid[j][i]->setState(fileState);
+      }
+    }
+    file.close();
   }
 };
