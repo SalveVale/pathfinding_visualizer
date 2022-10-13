@@ -15,7 +15,7 @@ public:
   
   enum states {
     empty,
-    hovered,
+    // hovered,
     wall,
     start,
     end,
@@ -33,9 +33,9 @@ public:
       case empty:
         this->box.setFillColor(sf::Color(155, 155, 155, 255));
         break;
-      case hovered:
-        this->box.setFillColor(sf::Color(55, 55, 55, 255));
-        break;
+      // case hovered:
+      //   this->box.setFillColor(sf::Color(55, 55, 55, 255));
+      //   break;
       case wall:
         this->box.setFillColor(sf::Color(12, 12, 12, 255));
         break;
