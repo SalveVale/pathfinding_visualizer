@@ -3,6 +3,7 @@
 #include <SFML/Window/VideoMode.hpp>
 
 #include "tile.hpp"
+#include "algo_dijkstra.cpp"
 
 #include <iostream>
 #include <fstream>
@@ -17,7 +18,7 @@ public:
     build,
     dropdownSelection,
     solve
-  } state = build;
+  } state = welcome;
 
   void setState(states newState) { this->state = newState; }
 };
@@ -38,16 +39,25 @@ public:
   }
 
   void update() {
-    this->pollEvents();
-    if (stateEngine.state == StateEngine::states::build)
+    switch (stateEngine.state)
     {
-      this->updateMouse();
-      this->updateUI();
-      this->updateTiles();
-    }
-    else if (stateEngine.state == StateEngine::states::solve)
-    {
-      this->solve(this->algorithm);
+      case StateEngine::states::welcome:
+        this->pollWelcomeEvents();
+        break;
+      case StateEngine::states::build:
+        this->pollEvents();
+        this->updateMouse();
+        this->updateUI();
+        this->updateTiles();
+        break;
+      case StateEngine::states::solve:
+        // this->window->setFramerateLimit(this->frameLimit);
+        this->pollEvents();
+        this->solve(this->algorithm);
+        break;
+      case StateEngine::states::dropdownSelection:
+        this->pollEvents();
+        break;
     }
   }
   
@@ -68,9 +78,10 @@ private:
   sf::RenderWindow *window;
   sf::VideoMode videoMode;
   sf::Event event;
-  Tile *grid[20][20];
+  Tile *grid[50][50];
   
   //ui
+  sf::RectangleShape welcomeShader;
   sf::RectangleShape sliderOutline;
   sf::RectangleShape sliderBox;
   // sf::RectangleShape highlightBox;
@@ -102,6 +113,9 @@ private:
     this->window = nullptr;
     
     //ui
+    this->welcomeShader.setSize(sf::Vector2f(1500, 1000));
+    this->welcomeShader.setFillColor(sf::Color(0, 0, 0, 185));
+    
     this->sliderOutline.setPosition(sf::Vector2f(30, 15));
     this->sliderOutline.setSize(sf::Vector2f(400, 30));
     this->sliderOutline.setFillColor(sf::Color(this->colButton));
@@ -134,7 +148,7 @@ private:
     this->algoOtherOneBox.setOutlineColor(sf::Color::White);
     this->algoOtherOneBox.setOutlineThickness(1);
     
-    this->algoOtherTwoBox.setPosition(sf::Vector2f(30, 560));
+    this->algoOtherTwoBox.setPosition(sf::Vector2f(30, 520));
     this->algoOtherTwoBox.setSize(sf::Vector2f(200, 40));
     this->algoOtherTwoBox.setFillColor(sf::Color(this->colButton));
     this->algoOtherTwoBox.setOutlineColor(sf::Color::White);
@@ -152,9 +166,9 @@ private:
     this->resetBox.setOutlineColor(sf::Color::White);
     this->resetBox.setOutlineThickness(1);
     
-    for (int i=0; i<20; i++)
+    for (int i=0; i<50; i++)
     {
-      for (int j=0; j<20; j++)
+      for (int j=0; j<50; j++)
       {
         this->grid[i][j] = new Tile(i, j);
       }
@@ -175,6 +189,26 @@ private:
     this->window->setFramerateLimit(60);
   }
   
+  void pollWelcomeEvents() {
+    while (this->window->pollEvent(this->event))
+    {
+      switch (this->event.type)
+      {
+        case sf::Event::Closed:
+          this->window->close();
+          break;
+        case sf::Event::KeyPressed:
+          if (this->event.key.code == sf::Keyboard::Escape) this->window->close();
+          else
+          {
+            this->stateEngine.setState(StateEngine::states::build);
+            this->welcomeShader.setFillColor(sf::Color::Transparent);
+          }
+        default: break;
+      }
+    }
+  }
+  
   void pollEvents() {
     while (this->window->pollEvent(this->event))
     {
@@ -187,9 +221,8 @@ private:
           if (this->event.key.code == sf::Keyboard::Escape)
             this->window->close();
           if (this->event.key.code == sf::Keyboard::A)
-            this->saveGridToFile("testfromwindow.txt");
-          if (this->event.key.code == sf::Keyboard::A)
-            this->loadGridFromFile("testgrid.txt");
+            this->stateEngine.setState(StateEngine::states::solve);
+          break;
         default: break;
       }
     }
@@ -314,12 +347,14 @@ private:
     this->window->draw(this->algoOtherTwoBox);
     this->window->draw(this->solveBox);
     this->window->draw(this->resetBox);
+
+    this->window->draw(this->welcomeShader);
   }
   
   void updateTiles() {
-    for (int i=0; i<20; i++)
+    for (int i=0; i<50; i++)
     {
-      for (int j=0; j<20; j++)
+      for (int j=0; j<50; j++)
       {
         Tile *currentTile = this->grid[i][j];
         Tile::states currentState = currentTile->state;
@@ -348,9 +383,9 @@ private:
   }
 
   void renderBoxes() {
-    for (int i=0; i<20; i++)
+    for (int i=0; i<50; i++)
     {
-      for (int j=0; j<20; j++)
+      for (int j=0; j<50; j++)
       {
         this->window->draw(this->grid[i][j]->getBox());
       }
@@ -362,9 +397,9 @@ private:
     std::ofstream file;
     file.open(fileName);
 
-    for (int i=0; i<20; i++)
+    for (int i=0; i<50; i++)
     {
-      for (int j=0; j<20; j++)
+      for (int j=0; j<50; j++)
       {
         file << this->grid[j][i]->state << " ";
       }
@@ -378,9 +413,9 @@ private:
     std::ifstream file;
     file.open(fileName);
 
-    for (int i=0; i<20; i++)
+    for (int i=0; i<50; i++)
     {
-      for (int j=0; j<20; j++)
+      for (int j=0; j<50; j++)
       {
         file >> fileState;
         this->grid[j][i]->setState(fileState);
@@ -393,6 +428,7 @@ private:
     switch (algo)
     {
       case dijkstra:
+        dijkstra::solve(this->grid);
         break;
       case aStar:
         break;

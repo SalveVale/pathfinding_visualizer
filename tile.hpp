@@ -1,13 +1,17 @@
+#pragma once
+
 #include <SFML/Graphics.hpp>
 
-const int BOX_SIZE = 50;
-const int PADDING =  500;
+const int BOX_SIZE = 20;
 
 class Tile {
 public:
   Tile(int x, int y) {
+    this->coords[0] = x;
+    this->coords[1] = y;
+    this->index = (10 * x) + y;
     this->box.setSize(sf::Vector2f(BOX_SIZE, BOX_SIZE));
-    this->box.setPosition(sf::Vector2f(PADDING + x*BOX_SIZE, y*BOX_SIZE));
+    this->box.setPosition(sf::Vector2f(500 + x*BOX_SIZE, y*BOX_SIZE));
     this->box.setFillColor(sf::Color(80, 80, 80, 255));
     this->box.setOutlineThickness(1);
     this->box.setOutlineColor(sf::Color::Black);
@@ -25,6 +29,8 @@ public:
   } state = empty;
   
   sf::RectangleShape getBox() { return this->box; }
+  
+  int getCoords(int key) { return this->coords[key]; }
   
   void setState(states newState) {
     this->state = newState;
@@ -76,10 +82,16 @@ public:
     }
   }
   
+  states getState() { return this->state; }
+  
+  int getIndex() { return this->index; }
+  
   bool containsMouse(sf::Vector2f mousePos) { return this->box.getGlobalBounds().contains(mousePos); }
 
 private:
   sf::RectangleShape box;
-  // int index;
+  int value;
+  int coords[2];
+  int index;
   // Tile *prevTile;
 };
