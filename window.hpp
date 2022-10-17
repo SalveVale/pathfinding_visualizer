@@ -102,7 +102,6 @@ public:
           case otherTwo:
             break;
         }
-        // this->pushToGrid();
         break;
       case StateEngine::states::solved:
         this->pollEvents();
@@ -141,7 +140,7 @@ private:
   sf::Event event;
   Tile *grid[50][50];
   Tile *startTile;
-  // Tile *endTile;
+  Tile *endTile;
   std::vector<Tile> unvisitedTiles;
   std::vector<Tile> visitedTilesInOrder;
   
@@ -163,6 +162,9 @@ private:
   sf::RectangleShape solveBox;
   sf::RectangleShape resetBox;
   sf::RectangleShape saveBox;
+  
+  bool movingStartTile = false;
+  bool movingEndTile = false;
   
   const sf::Color colButton = sf::Color(30, 20, 20, 255);
   const sf::Color colButtonHighlight = sf::Color(40, 30, 30, 255);
@@ -495,8 +497,29 @@ private:
         {
           if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
           {
-            if (currentState == Tile::empty || currentState == Tile::hovered) currentTile->setState(Tile::wall);
-            // else if (currentState == Tile::start || currentState == Tile::end)
+            if (currentState == Tile::empty || currentState == Tile::hovered)
+            {
+              if (this->movingStartTile)
+              {
+                this->startTile = currentTile;
+              }
+              else if (this->movingEndTile)
+              {
+                this->endTile = currentTile;
+              }
+              else 
+              {
+                currentTile->setState(Tile::wall);
+              }
+            }
+            else if (currentState == Tile::start)
+            {
+              this->movingStartTile = true;
+            }
+            else if (currentState == Tile::end)
+            {
+              this->movingEndTile = true;
+            }
           }
           else if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
           {
@@ -504,13 +527,17 @@ private:
           }
           else
           {
+            this->movingStartTile = false;
+            this->movingEndTile = false;
             if (currentState == Tile::empty) currentTile->setState(Tile::hovered);
           }
         }
         else
         {
-          if (currentState == Tile::hovered) currentTile->setState(Tile::empty);
+          if (currentState == Tile::hovered || currentState == Tile::start || currentState == Tile::end) currentTile->setState(Tile::empty);
         }
+        this->startTile->setState(Tile::start);
+        this->endTile->setState(Tile::end);
       }
     }
   }
@@ -561,6 +588,10 @@ private:
           this->unvisitedTiles.push_back(*this->startTile);
           // this->visitedTilesInOrder.push_back(*this->startTile);
         }
+        else if (fileState == 2)
+        {
+          this->endTile = grid[j][i];
+        }
       }
     }
     file.close();
@@ -594,7 +625,6 @@ private:
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
-            // up->setState(Tile::states::visited);
             up->setValue(checkedTile->getValue() + 1);
             up->setPrevTile(checkedTile);
             neighborTiles.push_back(*up);
@@ -614,7 +644,6 @@ private:
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
-            // left->setState(Tile::states::visited);
             left->setValue(checkedTile->getValue() + 1);
             neighborTiles.push_back(*left);
             this->visitedTilesInOrder.push_back(*left);
@@ -633,7 +662,6 @@ private:
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
-            // right->setState(Tile::states::visited);
             right->setValue(checkedTile->getValue() + 1);
             neighborTiles.push_back(*right);
             this->visitedTilesInOrder.push_back(*right);
@@ -652,7 +680,6 @@ private:
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
-            // down->setState(Tile::states::visited);
             down->setValue(checkedTile->getValue() + 1);
             neighborTiles.push_back(*down);
             this->visitedTilesInOrder.push_back(*down);
@@ -680,7 +707,7 @@ private:
   // }
 
   void animateSolving() {
-    this->visitedTilesInOrder[this->animationStep].setState(Tile::states::path);
+    this->grid[this->visitedTilesInOrder[this->animationStep].getCoords(0)][this->visitedTilesInOrder[this->animationStep].getCoords(1)]->setState(Tile::states::visited);
     this->animationStep++;
     if (this->animationStep >= this->visitedTilesInOrder.size())
     {
@@ -695,18 +722,11 @@ private:
     std::cout << "instant\n";
     for (int i=0; i<this->visitedTilesInOrder.size(); i++)
     {
-      this->grid[this->visitedTilesInOrder[i].getCoords(0)][this->visitedTilesInOrder[i].getCoords(1)]->setState(Tile::states::path);
+      this->grid[this->visitedTilesInOrder[i].getCoords(0)][this->visitedTilesInOrder[i].getCoords(1)]->setState(Tile::states::visited);
     }
     this->visitedTilesInOrder.clear();
     this->visitedTilesInOrder.push_back(*this->startTile);
     this->stateEngine.setState(StateEngine::build, this->window);
   }
-  
-  // void pushToGrid() {
-  //   for (int i=0; i<this->visitedTilesInOrder.size(); i++)
-  //   {
-  //     this->grid[this->visitedTilesInOrder[i].getCoords(0)][this->visitedTilesInOrder[i].getCoords(1)] = &this->visitedTilesInOrder[i];
-  //   }
-  // }
   
 };
