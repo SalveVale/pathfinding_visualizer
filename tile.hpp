@@ -16,7 +16,7 @@ public:
     this->box.setOutlineThickness(1);
     this->box.setOutlineColor(sf::Color::Black);
   }
-  ~Tile();
+  // ~Tile() { delete this; }
   
   enum states {
     empty,
@@ -79,10 +79,38 @@ public:
         this->state = wall;
         this->box.setFillColor(sf::Color(12, 12, 12, 255));
         break;
+      default:
+        this->state = empty;
+        this->box.setFillColor(sf::Color(80, 80, 80, 255));
+        break;
     }
   }
   
   states getState() { return this->state; }
+  
+  // int getStateInt() {
+  //   switch (this->state)
+  //   {
+  //     case empty:
+  //       return 0;
+  //       break;
+  //     case start:
+  //       return 1;
+  //       break;
+  //     case end:
+  //       return 2;
+  //       break;
+  //     case wall:
+  //       return 3;
+  //       break;
+  //     // case visited:
+  //     //   return 5;
+  //     //   break;
+  //     default:
+  //       return 0;
+  //       break;
+  //   }
+  // }
 
   void setValue(int newValue) { this->value = newValue; }
   
@@ -91,11 +119,15 @@ public:
   // int getIndex() { return this->index; }
   
   bool containsMouse(sf::Vector2f mousePos) { return this->box.getGlobalBounds().contains(mousePos); }
+  
+  void setPrevTile(Tile *prevTile) { this->prevTile = prevTile; }
+  
+  Tile *getPrevTile() { return this->prevTile; }
 
 private:
   sf::RectangleShape box;
   int value;
   int coords[2];
   // int index;
-  // Tile *prevTile;
+  Tile *prevTile;
 };
