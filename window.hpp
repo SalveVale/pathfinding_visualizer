@@ -29,7 +29,7 @@ public:
     if (this->state == welcome && newState == build) this->state = build;
     else if (this->state == build && newState == solving)
     {
-      // window->setFramerateLimit(1);
+      window->setFramerateLimit(1);
       this->state = solving;
       std::cout << "solving\n";
     }
@@ -89,6 +89,8 @@ public:
         break;
       case StateEngine::states::solving:
         this->pollEvents();
+        this->startTile->setValue(0);
+        this->visitedTilesInOrder.push_back(*this->startTile);
         this->clearGrid();
         switch (this->algorithm)
         {
@@ -105,14 +107,14 @@ public:
         break;
       case StateEngine::states::solved:
         this->pollEvents();
-        if (this->solveInstant)
-        {
+        // if (this->solveInstant)
+        // {
           this->drawSolving();
-        }
-        else
-        {
-          this->animateSolving();
-        }
+        // }
+        // else
+        // {
+        //   this->animateSolving();
+        // }
         break;
     }
   }
@@ -534,6 +536,7 @@ private:
         }
         else
         {
+          // if (currentState == Tile::hovered) currentTile->setState(Tile::empty);
           if (currentState == Tile::hovered || currentState == Tile::start || currentState == Tile::end) currentTile->setState(Tile::empty);
         }
         this->startTile->setState(Tile::start);
@@ -584,8 +587,8 @@ private:
         if (fileState == 1)
         {
           this->startTile = grid[j][i];
-          this->startTile->setValue(0);
-          this->unvisitedTiles.push_back(*this->startTile);
+          // this->startTile->setValue(0);
+          // this->unvisitedTiles.push_back(*this->startTile);
           // this->visitedTilesInOrder.push_back(*this->startTile);
         }
         else if (fileState == 2)
@@ -626,7 +629,7 @@ private:
             break;
           case Tile::states::empty:
             up->setValue(checkedTile->getValue() + 1);
-            up->setPrevTile(checkedTile);
+            // up->setPrevTile(checkedTile);
             neighborTiles.push_back(*up);
             this->visitedTilesInOrder.push_back(*up);
             break;
@@ -693,7 +696,7 @@ private:
     
     this->unvisitedTiles = neighborTiles;
     
-    if (this->stateEngine.state != StateEngine::solved) this->solveDijkstra();
+    // if (this->stateEngine.state != StateEngine::solved) this->solveDijkstra();
     this->stateEngine.setState(StateEngine::solved, this->window);
   }
 
@@ -719,7 +722,6 @@ private:
   }
   
   void drawSolving() {
-    std::cout << "instant\n";
     for (int i=0; i<this->visitedTilesInOrder.size(); i++)
     {
       this->grid[this->visitedTilesInOrder[i].getCoords(0)][this->visitedTilesInOrder[i].getCoords(1)]->setState(Tile::states::visited);
