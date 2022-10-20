@@ -29,7 +29,7 @@ public:
     if (this->state == welcome && newState == build) this->state = build;
     else if (this->state == build && newState == solving)
     {
-      window->setFramerateLimit(1);
+      // window->setFramerateLimit(1);
       this->state = solving;
       std::cout << "solving\n";
     }
@@ -50,7 +50,7 @@ public:
   void setFramerateLimit(int newLimit) { this->framerateLimit = newLimit; }
 
 private:
-  int framerateLimit;
+  int framerateLimit = 50;
 };
 
 
@@ -90,7 +90,7 @@ public:
       case StateEngine::states::solving:
         this->pollEvents();
         this->startTile->setValue(0);
-        this->visitedTilesInOrder.push_back(*this->startTile);
+        this->unvisitedTiles.push_back(*this->startTile);
         this->clearGrid();
         switch (this->algorithm)
         {
@@ -98,23 +98,27 @@ public:
             this->solveDijkstra();
             break;
           case aStar:
+            this->solveAStar();
             break;
           case otherOne:
+            this->solveOtherOne();
             break;
           case otherTwo:
+            this->solveOtherTwo();
             break;
         }
         break;
       case StateEngine::states::solved:
         this->pollEvents();
-        // if (this->solveInstant)
-        // {
+        this->unvisitedTiles.clear();
+        if (this->solveInstant)
+        {
           this->drawSolving();
-        // }
-        // else
-        // {
-        //   this->animateSolving();
-        // }
+        }
+        else
+        {
+          this->animateSolving();
+        }
         break;
     }
   }
@@ -150,7 +154,6 @@ private:
   
   // bool solved = false;
   
-  int solveFrameLimit = 5;
   bool solveInstant;
   
   //ui
@@ -198,7 +201,7 @@ private:
     this->sliderOutline.setOutlineColor(sf::Color::White);
     this->sliderOutline.setOutlineThickness(1);
     
-    this->sliderBox.setPosition(sf::Vector2f(200, 20));
+    this->sliderBox.setPosition(sf::Vector2f(290, 20));
     this->sliderBox.setSize(sf::Vector2f(20, 20));
     this->sliderBox.setFillColor(sf::Color::White);
     
@@ -329,27 +332,27 @@ private:
       {
         case 50:
           this->solveInstant = false;
-          this->stateEngine.setFramerateLimit(1);
+          this->stateEngine.setFramerateLimit(5);
           break;
         case 100:
           this->solveInstant = false;
-          this->stateEngine.setFramerateLimit(5);
+          this->stateEngine.setFramerateLimit(10);
           break;
         case 150:
           this->solveInstant = false;
-          this->stateEngine.setFramerateLimit(10);
+          this->stateEngine.setFramerateLimit(20);
           break;
         case 200:
           this->solveInstant = false;
-          this->stateEngine.setFramerateLimit(20);
+          this->stateEngine.setFramerateLimit(30);
           break;
         case 250:
           this->solveInstant = false;
-          this->stateEngine.setFramerateLimit(30);
+          this->stateEngine.setFramerateLimit(40);
           break;
         case 300:
           this->solveInstant = false;
-          this->stateEngine.setFramerateLimit(40);
+          this->stateEngine.setFramerateLimit(50);
           break;
         case 350:
           this->solveInstant = false;
@@ -601,6 +604,8 @@ private:
   }
   
   void clearGrid() {
+    // this->startTile->setValue(0);
+    // this->visitedTilesInOrder.push_back(*this->startTile);
     for (int i=0; i<50; i++)
     {
       for (int j=0; j<50; j++)
@@ -628,6 +633,7 @@ private:
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
+            up->setState(Tile::states::checked);
             up->setValue(checkedTile->getValue() + 1);
             // up->setPrevTile(checkedTile);
             neighborTiles.push_back(*up);
@@ -647,6 +653,7 @@ private:
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
+            left->setState(Tile::states::checked);
             left->setValue(checkedTile->getValue() + 1);
             neighborTiles.push_back(*left);
             this->visitedTilesInOrder.push_back(*left);
@@ -665,6 +672,7 @@ private:
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
+            right->setState(Tile::states::checked);
             right->setValue(checkedTile->getValue() + 1);
             neighborTiles.push_back(*right);
             this->visitedTilesInOrder.push_back(*right);
@@ -683,6 +691,7 @@ private:
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
+            down->setState(Tile::states::checked);
             down->setValue(checkedTile->getValue() + 1);
             neighborTiles.push_back(*down);
             this->visitedTilesInOrder.push_back(*down);
@@ -694,20 +703,24 @@ private:
 
     }
     
+    // this->unvisitedTiles.clear();
     this->unvisitedTiles = neighborTiles;
     
-    // if (this->stateEngine.state != StateEngine::solved) this->solveDijkstra();
-    this->stateEngine.setState(StateEngine::solved, this->window);
+    if (this->stateEngine.state != StateEngine::solved) this->solveDijkstra();
+    // this->stateEngine.setState(StateEngine::solved, this->window);
   }
 
-  // void solveAStar() {  
-  // }
+  void solveAStar() {  
+    this->stateEngine.setState(StateEngine::solved, this->window);
+  }
   
-  // void solveOtherOne() {
-  // }
+  void solveOtherOne() {
+    this->stateEngine.setState(StateEngine::solved, this->window);
+  }
   
-  // void solveOtherTwo() {
-  // }
+  void solveOtherTwo() {
+    this->stateEngine.setState(StateEngine::solved, this->window);
+  }
 
   void animateSolving() {
     this->grid[this->visitedTilesInOrder[this->animationStep].getCoords(0)][this->visitedTilesInOrder[this->animationStep].getCoords(1)]->setState(Tile::states::visited);
