@@ -132,5 +132,5 @@ private:
   int value;
   int coords[2];
   // int index;
-  Tile *prevTile;
+  Tile *prevTile = 0;
 };
