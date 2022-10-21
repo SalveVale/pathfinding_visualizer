@@ -126,6 +126,13 @@ public:
   void setPrevTile(Tile *prevTile) { this->prevTile = prevTile; }
   
   Tile *getPrevTile() { return this->prevTile; }
+  
+  void setPrevCoords(int x, int y) {
+    this->prevCoords[0] = x;
+    this->prevCoords[1] = y;
+  }
+  
+  int getPrevCoords(int key) { return this->prevCoords[key]; }
 
 private:
   sf::RectangleShape box;
@@ -133,4 +140,5 @@ private:
   int coords[2];
   // int index;
   Tile *prevTile = 0;
+  int prevCoords[2];
 };

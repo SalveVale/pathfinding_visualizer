@@ -132,7 +132,7 @@ public:
   
 private:
   //solving
-  Tile *currentTile;
+  // Tile *currentTile;
   int iterations = 1;
   
   StateEngine stateEngine;
@@ -625,13 +625,15 @@ private:
         switch (up->getState())
         {
           case Tile::states::end:
-            this->endTile->setPrevTile(up);
+            // this->endTile->setPrevTile(up);
+            this->endTile->setPrevCoords(xCoord, yCoord);
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
             up->setState(Tile::states::checked);
             up->setValue(checkedTile->getValue() + 1);
-            up->setPrevTile(checkedTile);
+            // up->setPrevTile(checkedTile);
+            up->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
             neighborTiles.push_back(*up);
             this->visitedTilesInOrder.push_back(*up);
             break;
@@ -646,13 +648,15 @@ private:
         switch (right->getState())
         {
           case Tile::states::end:
-            this->endTile->setPrevTile(right);
+            // this->endTile->setPrevTile(right);
+            this->endTile->setPrevCoords(xCoord, yCoord);
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
             right->setState(Tile::states::checked);
             right->setValue(checkedTile->getValue() + 1);
-            right->setPrevTile(checkedTile);
+            // right->setPrevTile(checkedTile);
+            right->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
             neighborTiles.push_back(*right);
             this->visitedTilesInOrder.push_back(*right);
             break;
@@ -667,13 +671,15 @@ private:
         switch (down->getState())
         {
           case Tile::states::end:
-            this->endTile->setPrevTile(down);
+            // this->endTile->setPrevTile(down);
+            this->endTile->setPrevCoords(xCoord, yCoord);
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
             down->setState(Tile::states::checked);
             down->setValue(checkedTile->getValue() + 1);
-            down->setPrevTile(checkedTile);
+            // down->setPrevTile(checkedTile);
+            down->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
             neighborTiles.push_back(*down);
             this->visitedTilesInOrder.push_back(*down);
             break;
@@ -688,13 +694,15 @@ private:
         switch (left->getState())
         {
           case Tile::states::end:
-            this->endTile->setPrevTile(left);
+            // this->endTile->setPrevTile(left);
+            this->endTile->setPrevCoords(xCoord, yCoord);
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
             left->setState(Tile::states::checked);
             left->setValue(checkedTile->getValue() + 1);
-            left->setPrevTile(checkedTile);
+            // left->setPrevTile(checkedTile);
+            left->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
             neighborTiles.push_back(*left);
             this->visitedTilesInOrder.push_back(*left);
             break;
@@ -746,19 +754,14 @@ private:
     this->visitedTilesInOrder.clear();
     this->visitedTilesInOrder.push_back(*this->startTile);
     
-    std::cout << this->endTile->getCoords(0) << " " << this->endTile->getCoords(1) << std::endl;
-    std::cout << this->endTile->getPrevTile()->getState();
-    // Tile *currentTile = this->endTile->getPrevTile();
-    // std::cout << currentTile->getCoords(0) << " " << currentTile->getCoords(1) << std::endl;
-    // currentTile->setState(Tile::states::path);
-    // currentTile = currentTile->getPrevTile();
-    // std::cout << currentTile->getCoords(0) << " " << currentTile->getCoords(1) << std::endl;
-
-    // while (currentTile->getPrevTile() != 0)
-    // {
-    //   currentTile->setState(Tile::states::path);
-    //   currentTile = currentTile->getPrevTile();
-    // }
+    int currentCoords[2] = { this->endTile->getPrevCoords(0), this->endTile->getPrevCoords(1) }; 
+    while (currentCoords[0] != this->startTile->getCoords(0) || currentCoords[1] != this->startTile->getCoords(1))
+    {
+      Tile *currentTile = this->grid[currentCoords[0]][currentCoords[1]];
+      currentTile->setState(Tile::states::path);
+      currentCoords[0] = currentTile->getPrevCoords(0);
+      currentCoords[1] = currentTile->getPrevCoords(1);
+    }
     
     this->stateEngine.setState(StateEngine::build, this->window);
   }
