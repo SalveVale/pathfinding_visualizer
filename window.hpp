@@ -106,14 +106,18 @@ public:
         break;
       case StateEngine::states::solved:
         this->pollEvents();
-        // if (this->solveInstant)
-        // {
+        if (this->solveInstant)
+        {
           this->drawSolving();
-        // }
-        // else
-        // {
-        //   this->animateSolving();
-        // }
+        }
+        else if (this->drawnVisited)
+        {
+          this->animatePath();
+        }
+        else
+        {
+          this->animateVisited();
+        }
         break;
     }
   }
@@ -150,6 +154,7 @@ private:
   // bool solved = false;
   
   bool solveInstant;
+  bool drawnVisited = false;
   
   //ui
   sf::RectangleShape welcomeShader;
@@ -165,6 +170,8 @@ private:
   
   bool movingStartTile = false;
   bool movingEndTile = false;
+  
+  int animationCoords[2];
   
   const sf::Color colButton = sf::Color(30, 20, 20, 255);
   const sf::Color colButtonHighlight = sf::Color(40, 30, 30, 255);
@@ -627,6 +634,8 @@ private:
           case Tile::states::end:
             // this->endTile->setPrevTile(up);
             this->endTile->setPrevCoords(xCoord, yCoord);
+            this->animationCoords[0] = xCoord;
+            this->animationCoords[1] = yCoord;
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
@@ -650,6 +659,8 @@ private:
           case Tile::states::end:
             // this->endTile->setPrevTile(right);
             this->endTile->setPrevCoords(xCoord, yCoord);
+            this->animationCoords[0] = xCoord;
+            this->animationCoords[1] = yCoord;
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
@@ -673,6 +684,8 @@ private:
           case Tile::states::end:
             // this->endTile->setPrevTile(down);
             this->endTile->setPrevCoords(xCoord, yCoord);
+            this->animationCoords[0] = xCoord;
+            this->animationCoords[1] = yCoord;
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
@@ -696,6 +709,8 @@ private:
           case Tile::states::end:
             // this->endTile->setPrevTile(left);
             this->endTile->setPrevCoords(xCoord, yCoord);
+            this->animationCoords[0] = xCoord;
+            this->animationCoords[1] = yCoord;
             this->stateEngine.setState(StateEngine::solved, this->window);
             break;
           case Tile::states::empty:
@@ -733,7 +748,7 @@ private:
     this->stateEngine.setState(StateEngine::solved, this->window);
   }
 
-  void animateSolving() {
+  void animateVisited() {
     this->grid[this->visitedTilesInOrder[this->animationStep].getCoords(0)][this->visitedTilesInOrder[this->animationStep].getCoords(1)]->setState(Tile::states::visited);
     this->animationStep++;
     if (this->animationStep >= this->visitedTilesInOrder.size())
@@ -741,8 +756,20 @@ private:
       this->animationStep = 0;
       this->visitedTilesInOrder.clear();
       this->visitedTilesInOrder.push_back(*this->startTile);
+      this->drawnVisited = true;
+    }
+  }
+  
+  void animatePath() {
+    if (this->animationCoords[0] == this->startTile->getCoords(0) && this->animationCoords[1] == this->startTile->getCoords(1))
+    {
       this->stateEngine.setState(StateEngine::build, this->window);
     }
+    
+    Tile *currentTile = this->grid[this->animationCoords[0]][this->animationCoords[1]];
+    currentTile->setState(Tile::states::path);
+    this->animationCoords[0] = currentTile->getPrevCoords(0);
+    this->animationCoords[1] = currentTile->getPrevCoords(1);
   }
   
   void drawSolving() {
@@ -754,13 +781,12 @@ private:
     this->visitedTilesInOrder.clear();
     this->visitedTilesInOrder.push_back(*this->startTile);
     
-    int currentCoords[2] = { this->endTile->getPrevCoords(0), this->endTile->getPrevCoords(1) }; 
-    while (currentCoords[0] != this->startTile->getCoords(0) || currentCoords[1] != this->startTile->getCoords(1))
+    while (this->animationCoords[0] != this->startTile->getCoords(0) || this->animationCoords[1] != this->startTile->getCoords(1))
     {
-      Tile *currentTile = this->grid[currentCoords[0]][currentCoords[1]];
+      Tile *currentTile = this->grid[this->animationCoords[0]][this->animationCoords[1]];
       currentTile->setState(Tile::states::path);
-      currentCoords[0] = currentTile->getPrevCoords(0);
-      currentCoords[1] = currentTile->getPrevCoords(1);
+      this->animationCoords[0] = currentTile->getPrevCoords(0);
+      this->animationCoords[1] = currentTile->getPrevCoords(1);
     }
     
     this->stateEngine.setState(StateEngine::build, this->window);
