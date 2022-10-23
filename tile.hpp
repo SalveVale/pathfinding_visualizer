@@ -116,6 +116,11 @@ public:
   // }
 
   void setValue(int newValue) { this->value = newValue; }
+  void setValue(int gValue, int hValue) {
+    this->gValue = gValue;
+    this->hValue = hValue;
+    this->value = gValue + hValue;
+  }
   
   int getValue() { return this->value; }
   
@@ -136,6 +141,8 @@ public:
 
 private:
   sf::RectangleShape box;
+  int gValue;
+  int hValue;
   int value;
   int coords[2];
   // int index;
