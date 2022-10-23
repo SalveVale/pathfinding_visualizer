@@ -97,6 +97,28 @@ public:
           case aStar:
             this->currentTile = this->startTile;
             this->solveAStar();
+
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->solveAStar();
+            this->stateEngine.setState(StateEngine::solved, this->window);
+            this->unvisitedTiles.clear();
+
             break;
           case otherOne:
             this->currentTile = this->startTile;
@@ -152,6 +174,7 @@ private:
   std::vector<Tile> unvisitedTiles;
   std::vector<Tile> visitedTilesInOrder;
   
+  int solvingStep = 0;
   int animationStep = 0;
   
   // bool solved = false;
@@ -740,7 +763,7 @@ private:
   }
 
   void solveAStar() {
-    std::vector<Tile> neighborTiles;
+    // std::vector<Tile> neighborTiles;
     int xCoord = this->currentTile->getCoords(0);
     int yCoord = this->currentTile->getCoords(1);
     
@@ -758,10 +781,11 @@ private:
           break;
         case Tile::states::empty:
           up->setState(Tile::states::checked);
-          up->setValue(1, this->calcHValue(xCoord, (yCoord - 1)));
+          up->setValue(this->solvingStep*10, this->calcHValue(xCoord, (yCoord - 1)));
+          // up->setValue(this->solvingStep*10);
           // up->setPrevTile(checkedTile);
           up->setPrevCoords(xCoord, yCoord); 
-          neighborTiles.push_back(*up);
+          this->unvisitedTiles.push_back(*up);
           this->visitedTilesInOrder.push_back(*up);
           break;
         default:
@@ -783,10 +807,11 @@ private:
           break;
         case Tile::states::empty:
           right->setState(Tile::states::checked);
-          right->setValue(1, this->calcHValue((xCoord + 1), yCoord));
+          right->setValue(this->solvingStep*10, this->calcHValue((xCoord + 1), yCoord));
+          // right->setValue(this->solvingStep*10);
           // right->setPrevTile(checkedTile);
           right->setPrevCoords(xCoord, yCoord); 
-          neighborTiles.push_back(*right);
+          this->unvisitedTiles.push_back(*right);
           this->visitedTilesInOrder.push_back(*right);
           break;
         default:
@@ -808,10 +833,11 @@ private:
           break;
         case Tile::states::empty:
           down->setState(Tile::states::checked);
-          down->setValue(1, this->calcHValue(xCoord, (yCoord + 1)));
+          down->setValue(this->solvingStep*10, this->calcHValue(xCoord, (yCoord + 1)));
+          // down->setValue(this->solvingStep*10);
           // down->setPrevTile(checkedTile);
           down->setPrevCoords(xCoord, yCoord); 
-          neighborTiles.push_back(*down);
+          this->unvisitedTiles.push_back(*down);
           this->visitedTilesInOrder.push_back(*down);
           break;
         default:
@@ -833,10 +859,11 @@ private:
           break;
         case Tile::states::empty:
           left->setState(Tile::states::checked);
-          left->setValue(1, this->calcHValue((xCoord - 1), yCoord));
+          left->setValue(this->solvingStep*10, this->calcHValue((xCoord - 1), yCoord));
+          // left->setValue(this->solvingStep*10);
           // left->setPrevTile(checkedTile);
           left->setPrevCoords(xCoord, yCoord); 
-          neighborTiles.push_back(*left);
+          this->unvisitedTiles.push_back(*left);
           this->visitedTilesInOrder.push_back(*left);
           break;
         default:
@@ -844,20 +871,30 @@ private:
       }
     }
     
-    int runningFCost = 9999;
+    int runningFCost = 99999;
+    int bestIndex;
     Tile *bestTile;
-    for (int i=0; i<neighborTiles.size(); i++)
+    for (int i=0; i<this->unvisitedTiles.size(); i++)
     {
-      int currentFCost = neighborTiles[i].getValue();
+      int currentFCost = this->unvisitedTiles[i].getValue();
+      std::cout << currentFCost << std::endl;
       if (currentFCost < runningFCost)
       {
         runningFCost = currentFCost;
-        bestTile = &neighborTiles[i];        
+        bestTile = &this->unvisitedTiles[i];
+        bestIndex = i;
       } 
     }
     this->currentTile = bestTile;
+    this->unvisitedTiles.erase(this->unvisitedTiles.begin() + bestIndex);
+    
+    this->solvingStep++;
+    
+    std::cout << this->currentTile->getValue() << std::endl;
 
-    if (this->stateEngine.state != StateEngine::solved) this->solveAStar();
+    // if (this->stateEngine.state != StateEngine::solved) this->solveAStar();
+    
+    // this->unvisitedTiles.clear();
   }
   
   void solveOtherOne() {
@@ -1107,7 +1144,7 @@ private:
   int calcHValue(int startx, int starty) {
     int x = abs(startx - this->endTile->getCoords(0));
     int y = abs(starty - this->endTile->getCoords(1));
-    return sqrt((x * x) + (y * y));
+    return static_cast<int>(sqrt((x * x) + (y * y)));
   }
 
   void animateVisited() {
