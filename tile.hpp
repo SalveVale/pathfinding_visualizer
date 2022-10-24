@@ -25,6 +25,8 @@ public:
     start,
     end,
     checked,
+    closed,
+    closedColor,
     visited,
     path
   } state = empty;
@@ -54,6 +56,11 @@ public:
         this->box.setFillColor(sf::Color::Red);
         break;
       case checked:
+        break;
+      case closed:
+        break;
+      case closedColor:
+        this->box.setFillColor(sf::Color::Cyan);
         break;
       case visited:
         this->box.setFillColor(sf::Color::Blue);
