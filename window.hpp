@@ -20,8 +20,8 @@ public:
     build,
     solving,
     solved,
-    buildSolved,
-    secondSolved
+    buildSolved
+    // secondSolved
   } state = welcome;
 
   void setState(states newState, sf::RenderWindow *window) {
@@ -53,12 +53,17 @@ public:
     else if (this->state == buildSolved && newState == solved)
     {
       std::cout << "2nd solve\n";
-      this->state = secondSolved;
+      this->state = solved;
     }
-    else if (this->state == secondSolved && newState == buildSolved)
+    // else if (this->state == secondSolved && newState == buildSolved)
+    // {
+    //   std::cout << "building after solve\n";
+    //   this->state = buildSolved;
+    // }
+    else if (this->state == buildSolved && newState == build)
     {
-      std::cout << "building after solve\n";
-      this->state = buildSolved;
+      std::cout << "resetting";
+      this->state = build;
     }
   }
   
@@ -124,14 +129,15 @@ public:
       case StateEngine::states::buildSolved:
         this->pollEvents();
         this->updateMouse();
-        this->updateUI();
+        this->updateUISolved();
         this->updateTilesSolved();
+        // this->clearGrid();
         break;
-      case StateEngine::states::secondSolved:
-        this->pollEvents();
-        std::cout << "0: drawing\n";
-        this->drawSolving();
-        break;
+      // case StateEngine::states::secondSolved:
+      //   this->pollEvents();
+      //   std::cout << "0: drawing\n";
+      //   this->drawSolving();
+      //   break;
     }
   }
   
@@ -170,8 +176,8 @@ private:
   bool solveInstant;
   bool drawnVisited = false;
   
-  // int prevStartCoords[2];
-  // int prevEndCoords[2];
+  int prevStartCoords[2];
+  int prevEndCoords[2];
   
   //ui
   sf::RectangleShape welcomeShader;
@@ -179,7 +185,7 @@ private:
   sf::RectangleShape sliderBox;
   sf::RectangleShape algoDijkstraBox;
   sf::RectangleShape algoAStarBox;
-  sf::RectangleShape algoOtherOneBox;
+  sf::RectangleShape algoDumbyBox;
   sf::RectangleShape algoOtherTwoBox;
   sf::RectangleShape solveBox;
   sf::RectangleShape resetBox;
@@ -202,7 +208,7 @@ private:
   enum algorithms {
     dijkstra,
     aStar,
-    otherOne,
+    dumby,
     otherTwo
   } algorithm = dijkstra;
   
@@ -236,11 +242,11 @@ private:
     this->algoAStarBox.setOutlineColor(sf::Color::White);
     this->algoAStarBox.setOutlineThickness(1);
     
-    this->algoOtherOneBox.setPosition(sf::Vector2f(30, 480));
-    this->algoOtherOneBox.setSize(sf::Vector2f(200, 40));
-    this->algoOtherOneBox.setFillColor(sf::Color(this->colButton));
-    this->algoOtherOneBox.setOutlineColor(sf::Color::White);
-    this->algoOtherOneBox.setOutlineThickness(1);
+    this->algoDumbyBox.setPosition(sf::Vector2f(30, 480));
+    this->algoDumbyBox.setSize(sf::Vector2f(200, 40));
+    this->algoDumbyBox.setFillColor(sf::Color(this->colButton));
+    this->algoDumbyBox.setOutlineColor(sf::Color::White);
+    this->algoDumbyBox.setOutlineThickness(1);
     
     this->algoOtherTwoBox.setPosition(sf::Vector2f(30, 520));
     this->algoOtherTwoBox.setSize(sf::Vector2f(200, 40));
@@ -322,6 +328,8 @@ private:
             this->window->close();
           if (this->event.key.code == sf::Keyboard::A)
             this->stateEngine.setState(StateEngine::states::solving, this->window);
+          if (this->event.key.code == sf::Keyboard::S)
+            this->clearGrid();
           break;
         default: break;
       }
@@ -367,15 +375,15 @@ private:
           break;
         case 250:
           this->solveInstant = false;
-          this->stateEngine.setFramerateLimit(40);
+          this->stateEngine.setFramerateLimit(60);
           break;
         case 300:
           this->solveInstant = false;
-          this->stateEngine.setFramerateLimit(50);
+          this->stateEngine.setFramerateLimit(120);
           break;
         case 350:
           this->solveInstant = false;
-          this->stateEngine.setFramerateLimit(60);
+          this->stateEngine.setFramerateLimit(200);
           break;
         case 400:
           this->solveInstant = true;
@@ -406,6 +414,11 @@ private:
       {
         this->resetBox.setFillColor(this->colButtonClick);
         this->loadGridFromFile("default_grid.txt");
+        
+        if (this->stateEngine.state == StateEngine::buildSolved)
+        {
+          this->stateEngine.setState(StateEngine::build, this->window);
+        }
       }
     }
     else
@@ -453,17 +466,17 @@ private:
       this->algoAStarBox.setFillColor(sf::Color(this->colButton));
     }
     
-    if (this->algoOtherOneBox.getGlobalBounds().contains(this->mousePosWindow))
+    if (this->algoDumbyBox.getGlobalBounds().contains(this->mousePosWindow))
     {
-      this->algoOtherOneBox.setFillColor(sf::Color(this->colButtonHighlight));
+      this->algoDumbyBox.setFillColor(sf::Color(this->colButtonHighlight));
       if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
       {
-        this->algorithm = algorithms::otherOne;
+        this->algorithm = algorithms::dumby;
       }
     }
     else
     {
-      this->algoOtherOneBox.setFillColor(sf::Color(this->colButton));
+      this->algoDumbyBox.setFillColor(sf::Color(this->colButton));
     }
     
     if (this->algoOtherTwoBox.getGlobalBounds().contains(this->mousePosWindow))
@@ -487,21 +500,56 @@ private:
       case algorithms::aStar:
         this->algoAStarBox.setFillColor(sf::Color(this->colButtonActive));
         break;
-      case algorithms::otherOne:
-        this->algoOtherOneBox.setFillColor(sf::Color(this->colButtonActive));
+      case algorithms::dumby:
+        this->algoDumbyBox.setFillColor(sf::Color(this->colButtonActive));
         break;
       case algorithms::otherTwo:
         this->algoOtherTwoBox.setFillColor(sf::Color(this->colButtonActive));
         break;
     }
   }
-  
+
+  void updateUISolved() {
+    if (this->solveBox.getGlobalBounds().contains(this->mousePosWindow))
+    {
+      this->solveBox.setFillColor(sf::Color(this->colButtonHighlight));
+      if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+      {
+        this->solveBox.setFillColor(this->colButtonClick);
+        this->stateEngine.setState(StateEngine::states::solving, this->window);
+      }
+    }
+    else
+    {
+      this->solveBox.setFillColor(sf::Color(this->colButton));
+    }
+
+    if (this->resetBox.getGlobalBounds().contains(this->mousePosWindow))
+    {
+      this->resetBox.setFillColor(sf::Color(this->colButtonHighlight));
+      if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+      {
+        this->resetBox.setFillColor(this->colButtonClick);
+        this->loadGridFromFile("default_grid.txt");
+        
+        if (this->stateEngine.state == StateEngine::buildSolved)
+        {
+          this->stateEngine.setState(StateEngine::build, this->window);
+        }
+      }
+    }
+    else
+    {
+      this->resetBox.setFillColor(sf::Color(this->colButton));
+    }
+  }  
+
   void renderUI() {
     this->window->draw(this->sliderOutline);
     this->window->draw(this->sliderBox);
     this->window->draw(this->algoDijkstraBox);
     this->window->draw(this->algoAStarBox);
-    this->window->draw(this->algoOtherOneBox);
+    this->window->draw(this->algoDumbyBox);
     this->window->draw(this->algoOtherTwoBox);
     this->window->draw(this->solveBox);
     this->window->draw(this->resetBox);
@@ -561,9 +609,9 @@ private:
           // if (currentState == Tile::hovered) currentTile->setState(Tile::empty);
           if (currentState == Tile::hovered || currentState == Tile::start || currentState == Tile::end) currentTile->setState(Tile::empty);
         }
-        this->startTile->setState(Tile::start);
-        this->endTile->setState(Tile::end);
       }
+      this->startTile->setState(Tile::start);
+      this->endTile->setState(Tile::end);
     }
   }
 
@@ -582,15 +630,19 @@ private:
             {
               if (this->movingStartTile)
               {
-                // this->prevStartCoords[0] = this->startTile->getCoords(0);
-                // this->prevStartCoords[1] = this->startTile->getCoords(1);
+                this->prevStartCoords[0] = this->startTile->getCoords(0);
+                this->prevStartCoords[1] = this->startTile->getCoords(1);
                 this->startTile = currentTile;
               }
               else if (this->movingEndTile)
               {
-                // this->prevEndCoords[0] = this->endTile->getCoords(0);
-                // this->prevEndCoords[1] = this->endTile->getCoords(1);
+                this->prevEndCoords[0] = this->endTile->getCoords(0);
+                this->prevEndCoords[1] = this->endTile->getCoords(1);
                 this->endTile = currentTile;
+              }
+              else
+              {
+                currentTile->setState(Tile::states::wall);
               }
             }
             else if (currentState == Tile::start)
@@ -627,11 +679,16 @@ private:
     this->endTile->setState(Tile::end);
 
     if (this->movingStartTile || this->movingEndTile)
-    // if ((this->startTile->getCoords(0) != this->prevStartCoords[0] && this->startTile->getCoords(1) != this->prevStartCoords[1]) || (this->endTile->getCoords(0) != this->prevEndCoords[0] && this->endTile->getCoords(1) != this->prevEndCoords[1]))
     {
-      // this->stateEngine.setState(StateEngine::solving, this->window);
-      this->clearGrid();
-      this->solve();
+      if ((this->startTile->getCoords(0) != this->prevStartCoords[0] && this->startTile->getCoords(1) != this->prevStartCoords[1]) || (this->endTile->getCoords(0) != this->prevEndCoords[0] && this->endTile->getCoords(1) != this->prevEndCoords[1]))
+      {
+        this->clearGrid();
+        std::cout << "doing 2nd solve\n";
+
+        // this->stateEngine.setState(StateEngine::solving, this->window);
+
+        this->solve();
+      }
     }
 
   }  
@@ -698,20 +755,144 @@ private:
       for (int j=0; j<50; j++)
       {
         Tile *checkedTile = this->grid[i][j];
-        if (checkedTile->getState() != Tile::states::wall && checkedTile->getState() != Tile::states::start && checkedTile->getState() != Tile::states::end) checkedTile->setState(Tile::states::empty);
+        if (checkedTile->getState() != Tile::states::wall && checkedTile->getState() != Tile::states::start && checkedTile->getState() != Tile::states::end) checkedTile->setStateNoColor(Tile::states::empty);
+        checkedTile->setValue(0);
       }
     }
   }
   
   void solveDijkstra() {
-    std::vector<Tile> neighborTiles;
-    for (int i=0; i<this->unvisitedTiles.size(); i++)
+    // if (this->stateEngine.state != StateEngine::solved || this->stateEngine.state != StateEngine::secondSolved)
+    if (this->stateEngine.state != StateEngine::solved)
     {
-      Tile *checkedTile = &this->unvisitedTiles[i];
+      std::vector<Tile> neighborTiles;
+      for (int i=0; i<this->unvisitedTiles.size(); i++)
+      {
+        Tile *checkedTile = &this->unvisitedTiles[i];
 
-      int xCoord = checkedTile->getCoords(0);
-      int yCoord = checkedTile->getCoords(1);
+        int xCoord = checkedTile->getCoords(0);
+        int yCoord = checkedTile->getCoords(1);
       
+        if (yCoord > 0)
+        {
+          Tile *up = this->grid[xCoord][yCoord - 1];
+          switch (up->getState())
+          {
+            case Tile::states::end:
+              // this->endTile->setPrevTile(up);
+              this->endTile->setPrevCoords(xCoord, yCoord);
+              this->animationCoords[0] = xCoord;
+              this->animationCoords[1] = yCoord;
+              this->stateEngine.setState(StateEngine::solved, this->window);
+              break;
+            case Tile::states::empty:
+              up->setState(Tile::states::checked);
+              // up->setValue(checkedTile->getValue() + 1);
+              // up->setPrevTile(checkedTile);
+              up->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
+              neighborTiles.push_back(*up);
+              this->visitedTilesInOrder.push_back(*up);
+              break;
+            default:
+              break;
+          }
+        }
+
+        if (xCoord < 50)
+        {
+          Tile *right = this->grid[xCoord + 1][yCoord];
+          switch (right->getState())
+          {
+            case Tile::states::end:
+              // this->endTile->setPrevTile(right);
+              this->endTile->setPrevCoords(xCoord, yCoord);
+              this->animationCoords[0] = xCoord;
+              this->animationCoords[1] = yCoord;
+              this->stateEngine.setState(StateEngine::solved, this->window);
+              break;
+            case Tile::states::empty:
+              right->setState(Tile::states::checked);
+              // right->setValue(checkedTile->getValue() + 1);
+              // right->setPrevTile(checkedTile);
+              right->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
+              neighborTiles.push_back(*right);
+              this->visitedTilesInOrder.push_back(*right);
+              break;
+            default:
+              break;
+          }
+        }
+
+        if (yCoord < 50)
+        {
+          Tile *down = this->grid[xCoord][yCoord + 1];
+          switch (down->getState())
+          {
+            case Tile::states::end:
+              // this->endTile->setPrevTile(down);
+              this->endTile->setPrevCoords(xCoord, yCoord);
+              this->animationCoords[0] = xCoord;
+              this->animationCoords[1] = yCoord;
+              this->stateEngine.setState(StateEngine::solved, this->window);
+              break;
+            case Tile::states::empty:
+              down->setState(Tile::states::checked);
+              // down->setValue(checkedTile->getValue() + 1);
+              // down->setPrevTile(checkedTile);
+              down->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
+              neighborTiles.push_back(*down);
+              this->visitedTilesInOrder.push_back(*down);
+              break;
+            default:
+              break;
+          }
+        }
+
+        if (xCoord > 0)
+        {
+          Tile *left = this->grid[xCoord - 1][yCoord];
+          switch (left->getState())
+          {
+            case Tile::states::end:
+              // this->endTile->setPrevTile(left);
+              this->endTile->setPrevCoords(xCoord, yCoord);
+              this->animationCoords[0] = xCoord;
+              this->animationCoords[1] = yCoord;
+              this->stateEngine.setState(StateEngine::solved, this->window);
+              break;
+            case Tile::states::empty:
+              left->setState(Tile::states::checked);
+              // left->setValue(checkedTile->getValue() + 1);
+              // left->setPrevTile(checkedTile);
+              left->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
+              neighborTiles.push_back(*left);
+              this->visitedTilesInOrder.push_back(*left);
+              break;
+            default:
+              break;
+          }
+        }
+
+      }
+    
+      this->unvisitedTiles.clear();
+      this->unvisitedTiles = neighborTiles;
+      
+      this->solveDijkstra();
+    }
+    else
+    {
+      this->unvisitedTiles.clear();
+    }
+  }
+
+  void solveAStar() {
+    if (this->stateEngine.state != StateEngine::solved)
+    {
+      // std::vector<Tile> neighborTiles;
+      int xCoord = this->currentTile->getCoords(0);
+      int yCoord = this->currentTile->getCoords(1);
+    
       if (yCoord > 0)
       {
         Tile *up = this->grid[xCoord][yCoord - 1];
@@ -726,10 +907,11 @@ private:
             break;
           case Tile::states::empty:
             up->setState(Tile::states::checked);
-            // up->setValue(checkedTile->getValue() + 1);
+            up->setValue(this->solvingStep*10, this->calcHValue(xCoord, (yCoord - 1)));
+            // up->setValue(this->solvingStep*10);
             // up->setPrevTile(checkedTile);
-            up->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
-            neighborTiles.push_back(*up);
+            up->setPrevCoords(xCoord, yCoord); 
+            // this->unvisitedTiles.push_back(*up);
             this->visitedTilesInOrder.push_back(*up);
             break;
           default:
@@ -751,10 +933,11 @@ private:
             break;
           case Tile::states::empty:
             right->setState(Tile::states::checked);
-            // right->setValue(checkedTile->getValue() + 1);
+            right->setValue(this->solvingStep*10, this->calcHValue((xCoord + 1), yCoord));
+            // right->setValue(this->solvingStep*10);
             // right->setPrevTile(checkedTile);
-            right->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
-            neighborTiles.push_back(*right);
+            right->setPrevCoords(xCoord, yCoord); 
+            // this->unvisitedTiles.push_back(*right);
             this->visitedTilesInOrder.push_back(*right);
             break;
           default:
@@ -776,10 +959,11 @@ private:
             break;
           case Tile::states::empty:
             down->setState(Tile::states::checked);
-            // down->setValue(checkedTile->getValue() + 1);
+            down->setValue(this->solvingStep*10, this->calcHValue(xCoord, (yCoord + 1)));
+            // down->setValue(this->solvingStep*10);
             // down->setPrevTile(checkedTile);
-            down->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
-            neighborTiles.push_back(*down);
+            down->setPrevCoords(xCoord, yCoord); 
+            // this->unvisitedTiles.push_back(*down);
             this->visitedTilesInOrder.push_back(*down);
             break;
           default:
@@ -801,183 +985,66 @@ private:
             break;
           case Tile::states::empty:
             left->setState(Tile::states::checked);
-            // left->setValue(checkedTile->getValue() + 1);
+            left->setValue(this->solvingStep*10, this->calcHValue((xCoord - 1), yCoord));
+            // left->setValue(this->solvingStep*10);
             // left->setPrevTile(checkedTile);
-            left->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
-            neighborTiles.push_back(*left);
+            left->setPrevCoords(xCoord, yCoord); 
+            // this->unvisitedTiles.push_back(*left);
             this->visitedTilesInOrder.push_back(*left);
             break;
           default:
             break;
         }
       }
-
-    }
     
-    this->unvisitedTiles.clear();
-    this->unvisitedTiles = neighborTiles;
+      // int runningFCost = 99999;
+      // int bestIndex;
+      // Tile *bestTile;
+      // for (int i=0; i<this->unvisitedTiles.size(); i++)
+      // {
+      //   int currentFCost = this->unvisitedTiles[i].getValue();
+      //   if (currentFCost < runningFCost)
+      //   {
+      //     runningFCost = currentFCost;
+      //     bestTile = &this->unvisitedTiles[i];
+      //     bestIndex = i;
+      //   } 
+      // }
+      // this->currentTile = bestTile;
+      // this->unvisitedTiles.erase(this->unvisitedTiles.begin() + bestIndex);
     
-    if (this->stateEngine.state != StateEngine::solved) this->solveDijkstra();
+      // this->solvingStep++;
     
-    this->unvisitedTiles.clear();
-  }
-
-  void solveAStar() {
-    // std::vector<Tile> neighborTiles;
-    int xCoord = this->currentTile->getCoords(0);
-    int yCoord = this->currentTile->getCoords(1);
+      // std::cout << this->currentTile->getValue() << std::endl;
     
-    if (yCoord > 0)
-    {
-      Tile *up = this->grid[xCoord][yCoord - 1];
-      switch (up->getState())
+      int bestFCost = 99999;
+      Tile *bestTile;
+      for (int i=0; i<50; i++)
       {
-        case Tile::states::end:
-          // this->endTile->setPrevTile(up);
-          this->endTile->setPrevCoords(xCoord, yCoord);
-          this->animationCoords[0] = xCoord;
-          this->animationCoords[1] = yCoord;
-          this->stateEngine.setState(StateEngine::solved, this->window);
-          break;
-        case Tile::states::empty:
-          up->setState(Tile::states::checked);
-          up->setValue(this->solvingStep*10, this->calcHValue(xCoord, (yCoord - 1)));
-          // up->setValue(this->solvingStep*10);
-          // up->setPrevTile(checkedTile);
-          up->setPrevCoords(xCoord, yCoord); 
-          // this->unvisitedTiles.push_back(*up);
-          this->visitedTilesInOrder.push_back(*up);
-          break;
-        default:
-          break;
-      }
-    }
-
-    if (xCoord < 50)
-    {
-      Tile *right = this->grid[xCoord + 1][yCoord];
-      switch (right->getState())
-      {
-        case Tile::states::end:
-          // this->endTile->setPrevTile(right);
-          this->endTile->setPrevCoords(xCoord, yCoord);
-          this->animationCoords[0] = xCoord;
-          this->animationCoords[1] = yCoord;
-          this->stateEngine.setState(StateEngine::solved, this->window);
-          break;
-        case Tile::states::empty:
-          right->setState(Tile::states::checked);
-          right->setValue(this->solvingStep*10, this->calcHValue((xCoord + 1), yCoord));
-          // right->setValue(this->solvingStep*10);
-          // right->setPrevTile(checkedTile);
-          right->setPrevCoords(xCoord, yCoord); 
-          // this->unvisitedTiles.push_back(*right);
-          this->visitedTilesInOrder.push_back(*right);
-          break;
-        default:
-          break;
-      }
-    }
-
-    if (yCoord < 50)
-    {
-      Tile *down = this->grid[xCoord][yCoord + 1];
-      switch (down->getState())
-      {
-        case Tile::states::end:
-          // this->endTile->setPrevTile(down);
-          this->endTile->setPrevCoords(xCoord, yCoord);
-          this->animationCoords[0] = xCoord;
-          this->animationCoords[1] = yCoord;
-          this->stateEngine.setState(StateEngine::solved, this->window);
-          break;
-        case Tile::states::empty:
-          down->setState(Tile::states::checked);
-          down->setValue(this->solvingStep*10, this->calcHValue(xCoord, (yCoord + 1)));
-          // down->setValue(this->solvingStep*10);
-          // down->setPrevTile(checkedTile);
-          down->setPrevCoords(xCoord, yCoord); 
-          // this->unvisitedTiles.push_back(*down);
-          this->visitedTilesInOrder.push_back(*down);
-          break;
-        default:
-          break;
-      }
-    }
-
-    if (xCoord > 0)
-    {
-      Tile *left = this->grid[xCoord - 1][yCoord];
-      switch (left->getState())
-      {
-        case Tile::states::end:
-          // this->endTile->setPrevTile(left);
-          this->endTile->setPrevCoords(xCoord, yCoord);
-          this->animationCoords[0] = xCoord;
-          this->animationCoords[1] = yCoord;
-          this->stateEngine.setState(StateEngine::solved, this->window);
-          break;
-        case Tile::states::empty:
-          left->setState(Tile::states::checked);
-          left->setValue(this->solvingStep*10, this->calcHValue((xCoord - 1), yCoord));
-          // left->setValue(this->solvingStep*10);
-          // left->setPrevTile(checkedTile);
-          left->setPrevCoords(xCoord, yCoord); 
-          // this->unvisitedTiles.push_back(*left);
-          this->visitedTilesInOrder.push_back(*left);
-          break;
-        default:
-          break;
-      }
-    }
-    
-    // int runningFCost = 99999;
-    // int bestIndex;
-    // Tile *bestTile;
-    // for (int i=0; i<this->unvisitedTiles.size(); i++)
-    // {
-    //   int currentFCost = this->unvisitedTiles[i].getValue();
-    //   if (currentFCost < runningFCost)
-    //   {
-    //     runningFCost = currentFCost;
-    //     bestTile = &this->unvisitedTiles[i];
-    //     bestIndex = i;
-    //   } 
-    // }
-    // this->currentTile = bestTile;
-    // this->unvisitedTiles.erase(this->unvisitedTiles.begin() + bestIndex);
-    
-    // this->solvingStep++;
-    
-    // std::cout << this->currentTile->getValue() << std::endl;
-    
-    int bestFCost = 99999;
-    Tile *bestTile;
-    for (int i=0; i<50; i++)
-    {
-      for (int j=0; j<50; j++)
-      {
-        Tile *checkedTile = this->grid[i][j];
-        if (checkedTile->getState() == Tile::states::checked)
+        for (int j=0; j<50; j++)
         {
-          int checkedValue = checkedTile->getValue();
-          if (checkedValue < bestFCost)
+          Tile *checkedTile = this->grid[i][j];
+          if (checkedTile->getState() == Tile::states::checked)
           {
-            bestFCost = checkedValue;
-            bestTile = checkedTile;
+            int checkedValue = checkedTile->getValue();
+            if (checkedValue < bestFCost)
+            {
+              bestFCost = checkedValue;
+              bestTile = checkedTile;
+            }
           }
         }
       }
-    }
-    bestTile->setState(Tile::states::closed);
-    this->currentTile = bestTile;
+      bestTile->setState(Tile::states::closed);
+      this->currentTile = bestTile;
 
-    if (this->stateEngine.state != StateEngine::solved) this->solveAStar();
+      this->solveAStar();
     
-    // this->unvisitedTiles.clear();
+      // this->unvisitedTiles.clear();
+    }
   }
   
-  void solveOtherOne() {
+  void solveDumby() {
     std::vector<Tile> neighborTiles;
     int xCoord = this->currentTile->getCoords(0);
     int yCoord = this->currentTile->getCoords(1);
@@ -1086,7 +1153,7 @@ private:
       }
     }
 
-    if (this->stateEngine.state != StateEngine::solved) this->solveOtherOne();
+    if (this->stateEngine.state != StateEngine::solved) this->solveDumby();
   }
   
   void solveOtherTwo() {
@@ -1171,6 +1238,7 @@ private:
   }
   
   void solve() {
+    this->clearGrid();
     switch (this->algorithm)
     {
       case dijkstra:
@@ -1182,9 +1250,9 @@ private:
         this->currentTile = this->startTile;
         this->solveAStar();
         break;
-      case otherOne:
+      case dumby:
         this->currentTile = this->startTile;
-        this->solveOtherOne();
+        this->solveDumby();
         break;
       case otherTwo:
         this->solveOtherTwo();

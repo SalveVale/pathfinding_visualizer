@@ -96,6 +96,10 @@ public:
     }
   }
   
+  void setStateNoColor(states newState) {
+    this->state = newState;
+  }
+  
   states getState() { return this->state; }
   
   // int getStateInt() {
