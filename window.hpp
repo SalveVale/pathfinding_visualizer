@@ -19,7 +19,9 @@ public:
     welcome,
     build,
     solving,
-    solved
+    solved,
+    buildSolved,
+    secondSolved
   } state = welcome;
 
   void setState(states newState, sf::RenderWindow *window) {
@@ -36,11 +38,27 @@ public:
       window->setFramerateLimit(this->framerateLimit);
       this->state = solved;
     }
-    else if (this->state == solved && newState == build)
+    // else if (this->state == solved && newState == build)
+    // {
+    //   std::cout << "building\n";
+    //   window->setFramerateLimit(60);
+    //   this->state = build;
+    // }
+    else if (this->state == solved && newState == buildSolved)
     {
-      std::cout << "building\n";
+      std::cout << "building after solve\n";
       window->setFramerateLimit(60);
-      this->state = build;
+      this->state = buildSolved;
+    }
+    else if (this->state == buildSolved && newState == solved)
+    {
+      std::cout << "2nd solve\n";
+      this->state = secondSolved;
+    }
+    else if (this->state == secondSolved && newState == buildSolved)
+    {
+      std::cout << "building after solve\n";
+      this->state = buildSolved;
     }
   }
   
@@ -87,39 +105,7 @@ public:
       case StateEngine::states::solving:
         this->pollEvents();
         this->clearGrid();
-        switch (this->algorithm)
-        {
-          case dijkstra:
-            this->startTile->setValue(0);
-            this->unvisitedTiles.push_back(*this->startTile);
-            this->solveDijkstra();
-            break;
-          case aStar:
-            this->currentTile = this->startTile;
-            this->solveAStar();
-            break;
-          case otherOne:
-            this->currentTile = this->startTile;
-            this->solveOtherOne();
-
-            // this->solveOtherOne();
-            // this->solveOtherOne();
-            // this->solveOtherOne();
-            // this->solveOtherOne();
-            // this->solveOtherOne();
-            // this->solveOtherOne();
-            // this->solveOtherOne();
-            // this->solveOtherOne();
-            // this->solveOtherOne();
-            // this->solveOtherOne();
-            // this->solveOtherOne();
-            // this->stateEngine.setState(StateEngine::solved, this->window);
-
-            break;
-          case otherTwo:
-            this->solveOtherTwo();
-            break;
-        }
+        this->solve();
         break;
       case StateEngine::states::solved:
         this->pollEvents();
@@ -135,6 +121,16 @@ public:
         {
           this->animateVisited();
         }
+      case StateEngine::states::buildSolved:
+        this->pollEvents();
+        this->updateMouse();
+        this->updateUI();
+        this->updateTilesSolved();
+        break;
+      case StateEngine::states::secondSolved:
+        this->pollEvents();
+        std::cout << "0: drawing\n";
+        this->drawSolving();
         break;
     }
   }
@@ -173,6 +169,9 @@ private:
   
   bool solveInstant;
   bool drawnVisited = false;
+  
+  // int prevStartCoords[2];
+  // int prevEndCoords[2];
   
   //ui
   sf::RectangleShape welcomeShader;
@@ -568,6 +567,74 @@ private:
     }
   }
 
+  void updateTilesSolved() {
+    for (int i=0; i<50; i++)
+    {
+      for (int j=0; j<50; j++)
+      {
+        Tile *currentTile = this->grid[i][j];
+        Tile::states currentState = currentTile->state;
+        if (currentTile->containsMouse(this->mousePosWindow))
+        {
+          if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+          {
+            if (currentState == Tile::empty || currentState == Tile::visited)
+            {
+              if (this->movingStartTile)
+              {
+                // this->prevStartCoords[0] = this->startTile->getCoords(0);
+                // this->prevStartCoords[1] = this->startTile->getCoords(1);
+                this->startTile = currentTile;
+              }
+              else if (this->movingEndTile)
+              {
+                // this->prevEndCoords[0] = this->endTile->getCoords(0);
+                // this->prevEndCoords[1] = this->endTile->getCoords(1);
+                this->endTile = currentTile;
+              }
+            }
+            else if (currentState == Tile::start)
+            {
+              this->movingStartTile = true;
+            }
+            else if (currentState == Tile::end)
+            {
+              this->movingEndTile = true;
+            }
+          }
+          else
+          {
+            this->movingStartTile = false;
+            this->movingEndTile = false;
+          }
+        }
+        else
+        {
+          // if (currentState == Tile::hovered) currentTile->setState(Tile::empty);
+          if (currentState == Tile::start || currentState == Tile::end) currentTile->setState(Tile::empty);
+        }
+        // this->startTile->setState(Tile::start);
+        // this->endTile->setState(Tile::end);
+        // if (this->movingStartTile || this->movingEndTile)
+        // {
+        //   this->stateEngine.setState(StateEngine::solving, this->window);
+        //   // this->solve();
+        // }
+      }
+    }
+
+    this->startTile->setState(Tile::start);
+    this->endTile->setState(Tile::end);
+
+    if (this->movingStartTile || this->movingEndTile)
+    // if ((this->startTile->getCoords(0) != this->prevStartCoords[0] && this->startTile->getCoords(1) != this->prevStartCoords[1]) || (this->endTile->getCoords(0) != this->prevEndCoords[0] && this->endTile->getCoords(1) != this->prevEndCoords[1]))
+    {
+      // this->stateEngine.setState(StateEngine::solving, this->window);
+      this->clearGrid();
+      this->solve();
+    }
+
+  }  
   void renderBoxes() {
     for (int i=0; i<50; i++)
     {
@@ -630,7 +697,8 @@ private:
     {
       for (int j=0; j<50; j++)
       {
-        if (this->grid[i][j]->getState() == Tile::states::hovered) this->grid[i][j]->setState(Tile::states::empty);
+        Tile *checkedTile = this->grid[i][j];
+        if (checkedTile->getState() != Tile::states::wall && checkedTile->getState() != Tile::states::start && checkedTile->getState() != Tile::states::end) checkedTile->setState(Tile::states::empty);
       }
     }
   }
@@ -1054,7 +1122,7 @@ private:
   void animatePath() {
     if (this->animationCoords[0] == this->startTile->getCoords(0) && this->animationCoords[1] == this->startTile->getCoords(1))
     {
-      this->stateEngine.setState(StateEngine::build, this->window);
+      this->stateEngine.setState(StateEngine::buildSolved, this->window);
     }
     
     Tile *currentTile = this->grid[this->animationCoords[0]][this->animationCoords[1]];
@@ -1064,6 +1132,7 @@ private:
   }
   
   void drawSolving() {
+    std::cout << "1: drawing visited\n";
     for (int i=0; i<this->visitedTilesInOrder.size(); i++)
     {
       Tile *setTile = this->grid[this->visitedTilesInOrder[i].getCoords(0)][this->visitedTilesInOrder[i].getCoords(1)];
@@ -1089,6 +1158,7 @@ private:
     //   currentCoords[1] = currentTile->getPrevCoords(1);
     // }
     
+    std::cout << "1: drawing path\n";
     while (this->animationCoords[0] != this->startTile->getCoords(0) || this->animationCoords[1] != this->startTile->getCoords(1))
     {
       Tile *currentTile = this->grid[this->animationCoords[0]][this->animationCoords[1]];
@@ -1097,7 +1167,28 @@ private:
       this->animationCoords[1] = currentTile->getPrevCoords(1);
     }
     
-    this->stateEngine.setState(StateEngine::build, this->window);
+    this->stateEngine.setState(StateEngine::buildSolved, this->window);
   }
   
+  void solve() {
+    switch (this->algorithm)
+    {
+      case dijkstra:
+        this->startTile->setValue(0);
+        this->unvisitedTiles.push_back(*this->startTile);
+        this->solveDijkstra();
+        break;
+      case aStar:
+        this->currentTile = this->startTile;
+        this->solveAStar();
+        break;
+      case otherOne:
+        this->currentTile = this->startTile;
+        this->solveOtherOne();
+        break;
+      case otherTwo:
+        this->solveOtherTwo();
+        break;
+    }
+  }
 };

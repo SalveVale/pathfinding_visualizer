@@ -73,10 +73,10 @@ public:
   void setState(int newState) {
     switch (newState)
     {
-      case 0:
-        this->state = empty;
-        this->box.setFillColor(sf::Color(80, 80, 80, 255));
-        break;
+      // case 0:
+      //   this->state = empty;
+      //   this->box.setFillColor(sf::Color(80, 80, 80, 255));
+      //   break;
       case 1:
         this->state = start;
         this->box.setFillColor(sf::Color::Green);
