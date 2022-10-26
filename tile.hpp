@@ -70,6 +70,7 @@ public:
         break;
     }
   }
+
   void setState(int newState) {
     switch (newState)
     {
@@ -98,6 +99,42 @@ public:
   
   void setStateNoColor(states newState) {
     this->state = newState;
+  }
+  
+  void resetColor() {
+    sf::Color currentColor = this->box.getFillColor();
+    
+    switch (this->state)
+    {
+      case empty:
+        if (currentColor != sf::Color(80, 80, 80, 255)) this->box.setFillColor(sf::Color(80, 80, 80, 255));
+        break;
+      case hovered:
+        if (currentColor != sf::Color(55, 55, 55, 255)) this->box.setFillColor(sf::Color(55, 55, 55, 255));
+        break;
+      case wall:
+        if (currentColor != sf::Color(12, 12, 12, 255)) this->box.setFillColor(sf::Color(12, 12, 12, 255));
+        break;
+      case start:
+        if (currentColor != sf::Color::Green) this->box.setFillColor(sf::Color::Green);
+        break;
+      case end:
+        if (currentColor != sf::Color::Red) this->box.setFillColor(sf::Color::Red);
+        break;
+      case checked:
+        break;
+      case closed:
+        break;
+      case closedColor:
+        if (currentColor != sf::Color::Cyan) this->box.setFillColor(sf::Color::Cyan);
+        break;
+      case visited:
+        if (currentColor != sf::Color::Blue) this->box.setFillColor(sf::Color::Blue);
+        break;
+      case path:
+        if (currentColor != sf::Color::Yellow) this->box.setFillColor(sf::Color::Yellow);
+        break;
+    }
   }
   
   states getState() { return this->state; }
