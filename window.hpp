@@ -186,11 +186,24 @@ private:
   sf::RectangleShape algoDijkstraBox;
   sf::RectangleShape algoAStarBox;
   sf::RectangleShape algoDumbyBox;
-  sf::RectangleShape algoOtherTwoBox;
   sf::RectangleShape solveBox;
   sf::RectangleShape resetBox;
   sf::RectangleShape saveBox;
   
+  sf::Font font;
+  
+  sf::Text sliderText;
+  sf::Text sliderNums;
+  sf::Text algorithmsText;
+  sf::Text algoDijkstraText;
+  sf::Text algoAStarText;
+  sf::Text algoDumbyText;
+  sf::Text algoSummaryText;
+  sf::Text solveBoxText;
+  sf::Text resetBoxText;
+  sf::Text saveBoxText;
+  
+  //logic
   bool movingStartTile = false;
   bool movingEndTile = false;
   
@@ -208,8 +221,7 @@ private:
   enum algorithms {
     dijkstra,
     aStar,
-    dumby,
-    otherTwo
+    dumby
   } algorithm = dijkstra;
   
 
@@ -230,6 +242,57 @@ private:
     this->sliderBox.setSize(sf::Vector2f(20, 20));
     this->sliderBox.setFillColor(sf::Color::White);
     
+    if (!font.loadFromFile("resources/Roboto/Roboto-Regular.ttf")) std::cout << "Failed to load font from file";
+    
+    this->sliderText.setFont(this->font);
+    this->sliderText.setCharacterSize(20);
+    this->sliderText.setPosition(sf::Vector2f(30, 50));
+    this->sliderText.setString("Solve animation speed:");
+    
+    this->sliderNums.setFont(this->font);
+    this->sliderNums.setCharacterSize(20);
+    this->sliderNums.setPosition(sf::Vector2f(300, 50));
+    this->sliderNums.setString("120");
+
+    this->algorithmsText.setFont(this->font);
+    this->algorithmsText.setCharacterSize(20);
+    this->algorithmsText.setPosition(sf::Vector2f(30, 300));
+    this->algorithmsText.setString("Algorithms");
+    
+    this->algoDijkstraText.setFont(this->font);
+    this->algoDijkstraText.setCharacterSize(20);
+    this->algoDijkstraText.setPosition(sf::Vector2f(50, 400));
+    this->algoDijkstraText.setString("Dijkstra");
+    
+    this->algoAStarText.setFont(this->font);
+    this->algoAStarText.setCharacterSize(20);
+    this->algoAStarText.setPosition(sf::Vector2f(50, 440));
+    this->algoAStarText.setString("A*");
+    
+    this->algoDumbyText.setFont(this->font);
+    this->algoDumbyText.setCharacterSize(20);
+    this->algoDumbyText.setPosition(sf::Vector2f(50, 480));
+    this->algoDumbyText.setString("Dumby");
+    
+    this->algoSummaryText.setFont(this->font);
+    this->algoSummaryText.setCharacterSize(20);
+    this->algoSummaryText.setPosition(sf::Vector2f(250, 400));
+    
+    this->solveBoxText.setFont(this->font);
+    this->solveBoxText.setCharacterSize(20);
+    this->solveBoxText.setPosition(sf::Vector2f(40, 800));
+    this->solveBoxText.setString("Solve");
+    
+    this->resetBoxText.setFont(this->font);
+    this->resetBoxText.setCharacterSize(20);
+    this->resetBoxText.setPosition(sf::Vector2f(40, 900));
+    this->resetBoxText.setString("Reset");
+    
+    this->saveBoxText.setFont(this->font);
+    this->saveBoxText.setCharacterSize(20);
+    this->saveBoxText.setPosition(sf::Vector2f(290, 900));
+    this->saveBoxText.setString("Save");
+    
     this->algoDijkstraBox.setPosition(sf::Vector2f(30, 400));
     this->algoDijkstraBox.setSize(sf::Vector2f(200, 40));
     this->algoDijkstraBox.setFillColor(sf::Color(this->colButton));
@@ -247,12 +310,6 @@ private:
     this->algoDumbyBox.setFillColor(sf::Color(this->colButton));
     this->algoDumbyBox.setOutlineColor(sf::Color::White);
     this->algoDumbyBox.setOutlineThickness(1);
-    
-    this->algoOtherTwoBox.setPosition(sf::Vector2f(30, 520));
-    this->algoOtherTwoBox.setSize(sf::Vector2f(200, 40));
-    this->algoOtherTwoBox.setFillColor(sf::Color(this->colButton));
-    this->algoOtherTwoBox.setOutlineColor(sf::Color::White);
-    this->algoOtherTwoBox.setOutlineThickness(1);
     
     this->solveBox.setPosition(sf::Vector2f(30, 800));
     this->solveBox.setSize(sf::Vector2f(200, 30));
@@ -358,34 +415,42 @@ private:
       switch (mousePos)
       {
         case 50:
+          this->sliderNums.setString("5");
           this->solveInstant = false;
           this->stateEngine.setFramerateLimit(5);
           break;
         case 100:
+          this->sliderNums.setString("10");
           this->solveInstant = false;
           this->stateEngine.setFramerateLimit(10);
           break;
         case 150:
+          this->sliderNums.setString("20");
           this->solveInstant = false;
           this->stateEngine.setFramerateLimit(20);
           break;
         case 200:
+          this->sliderNums.setString("30");
           this->solveInstant = false;
           this->stateEngine.setFramerateLimit(30);
           break;
         case 250:
+          this->sliderNums.setString("60");
           this->solveInstant = false;
           this->stateEngine.setFramerateLimit(60);
           break;
         case 300:
+          this->sliderNums.setString("120");
           this->solveInstant = false;
           this->stateEngine.setFramerateLimit(120);
           break;
         case 350:
+          this->sliderNums.setString("200");
           this->solveInstant = false;
           this->stateEngine.setFramerateLimit(200);
           break;
         case 400:
+          this->sliderNums.setString("Instant");
           this->solveInstant = true;
           this->stateEngine.setFramerateLimit(1);
           break;
@@ -479,32 +544,19 @@ private:
       this->algoDumbyBox.setFillColor(sf::Color(this->colButton));
     }
     
-    if (this->algoOtherTwoBox.getGlobalBounds().contains(this->mousePosWindow))
-    {
-      this->algoOtherTwoBox.setFillColor(sf::Color(this->colButtonHighlight));
-      if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-      {
-        this->algorithm = algorithms::otherTwo;
-      }
-    }
-    else
-    {
-      this->algoOtherTwoBox.setFillColor(sf::Color(this->colButton));
-    }
-
     switch (this->algorithm)
     {
       case algorithms::dijkstra:
+        this->algoSummaryText.setString("This is Dijkstra's algorithm");
         this->algoDijkstraBox.setFillColor(sf::Color(this->colButtonActive));
         break;
       case algorithms::aStar:
+        this->algoSummaryText.setString("AStar is best");
         this->algoAStarBox.setFillColor(sf::Color(this->colButtonActive));
         break;
       case algorithms::dumby:
+        this->algoSummaryText.setString("Dumby sucks");
         this->algoDumbyBox.setFillColor(sf::Color(this->colButtonActive));
-        break;
-      case algorithms::otherTwo:
-        this->algoOtherTwoBox.setFillColor(sf::Color(this->colButtonActive));
         break;
     }
   }
@@ -550,10 +602,20 @@ private:
     this->window->draw(this->algoDijkstraBox);
     this->window->draw(this->algoAStarBox);
     this->window->draw(this->algoDumbyBox);
-    this->window->draw(this->algoOtherTwoBox);
     this->window->draw(this->solveBox);
     this->window->draw(this->resetBox);
     this->window->draw(this->saveBox);
+    
+    this->window->draw(this->sliderText);
+    this->window->draw(this->sliderNums);
+    this->window->draw(this->algorithmsText);
+    this->window->draw(this->algoDijkstraText);
+    this->window->draw(this->algoAStarText);
+    this->window->draw(this->algoDumbyText);
+    this->window->draw(this->algoSummaryText);
+    this->window->draw(this->solveBoxText);
+    this->window->draw(this->resetBoxText);
+    this->window->draw(this->saveBoxText);
 
     this->window->draw(this->welcomeShader);
   }
@@ -1160,10 +1222,6 @@ private:
     }
   }
   
-  void solveOtherTwo() {
-    this->stateEngine.setState(StateEngine::solved, this->window);
-  }
-  
   int calcHValue(int startx, int starty) {
     int x = abs(startx - this->endTile->getCoords(0));
     int y = abs(starty - this->endTile->getCoords(1));
@@ -1266,9 +1324,6 @@ private:
       case dumby:
         this->currentTile = this->startTile;
         this->solveDumby();
-        break;
-      case otherTwo:
-        this->solveOtherTwo();
         break;
     }
   }
