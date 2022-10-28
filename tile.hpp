@@ -78,15 +78,15 @@ public:
       //   this->state = empty;
       //   this->box.setFillColor(sf::Color(80, 80, 80, 255));
       //   break;
-      case 1:
+      case 3:
         this->state = start;
         this->box.setFillColor(sf::Color::Green);
         break;
-      case 2:
+      case 4:
         this->state = end;
         this->box.setFillColor(sf::Color::Red);
         break;
-      case 3:
+      case 2:
         this->state = wall;
         this->box.setFillColor(sf::Color(12, 12, 12, 255));
         break;

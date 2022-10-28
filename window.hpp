@@ -25,7 +25,11 @@ public:
   } state = welcome;
 
   void setState(states newState, sf::RenderWindow *window) {
-    if (this->state == welcome && newState == build) this->state = build;
+    if (this->state == welcome && newState == build)
+    {
+      std::cout << "building\n";
+      this->state = build;
+    }
     else if (this->state == build && newState == solving)
     {
       // window->setFramerateLimit(1);
@@ -70,7 +74,7 @@ public:
   void setFramerateLimit(int newLimit) { this->framerateLimit = newLimit; }
 
 private:
-  int framerateLimit = 50;
+  int framerateLimit = 120;
 };
 
 
@@ -133,11 +137,6 @@ public:
         this->updateTilesSolved();
         // this->clearGrid();
         break;
-      // case StateEngine::states::secondSolved:
-      //   this->pollEvents();
-      //   std::cout << "0: drawing\n";
-      //   this->drawSolving();
-      //   break;
     }
   }
   
@@ -180,7 +179,9 @@ private:
   int prevEndCoords[2];
   
   //ui
+  int welcomeSlideNum = 0;
   sf::RectangleShape welcomeShader;
+  
   sf::RectangleShape sliderOutline;
   sf::RectangleShape sliderBox;
   sf::RectangleShape algoDijkstraBox;
@@ -191,6 +192,9 @@ private:
   sf::RectangleShape saveBox;
   
   sf::Font font;
+  
+  sf::Text welcomeTitle;
+  sf::Text welcomeText;
   
   sf::Text sliderText;
   sf::Text sliderNums;
@@ -230,7 +234,7 @@ private:
     
     //ui
     this->welcomeShader.setSize(sf::Vector2f(1500, 1000));
-    this->welcomeShader.setFillColor(sf::Color(0, 0, 0, 185));
+    this->welcomeShader.setFillColor(sf::Color(0, 0, 0, 225));
     
     this->sliderOutline.setPosition(sf::Vector2f(30, 15));
     this->sliderOutline.setSize(sf::Vector2f(400, 30));
@@ -243,6 +247,16 @@ private:
     this->sliderBox.setFillColor(sf::Color::White);
     
     if (!font.loadFromFile("resources/Roboto/Roboto-Regular.ttf")) std::cout << "Failed to load font from file";
+
+    this->welcomeTitle.setFont(this->font);
+    this->welcomeTitle.setCharacterSize(30);
+    this->welcomeTitle.setPosition(sf::Vector2f(500, 10));
+    this->welcomeTitle.setString("Pathfinding Algorithm Visualizer");
+    
+    this->welcomeText.setFont(this->font);
+    this->welcomeText.setCharacterSize(18);
+    this->welcomeText.setPosition(sf::Vector2f(50, 50));
+    this->welcomeText.setString("This simple program allows you to visualize how different pathfinding algoriths work. You can draw and erase obsticles on a grid and move the stating and ending tiles");
     
     this->sliderText.setFont(this->font);
     this->sliderText.setCharacterSize(20);
@@ -256,27 +270,27 @@ private:
 
     this->algorithmsText.setFont(this->font);
     this->algorithmsText.setCharacterSize(20);
-    this->algorithmsText.setPosition(sf::Vector2f(30, 300));
+    this->algorithmsText.setPosition(sf::Vector2f(30, 350));
     this->algorithmsText.setString("Algorithms");
     
     this->algoDijkstraText.setFont(this->font);
     this->algoDijkstraText.setCharacterSize(20);
-    this->algoDijkstraText.setPosition(sf::Vector2f(50, 400));
+    this->algoDijkstraText.setPosition(sf::Vector2f(40, 410));
     this->algoDijkstraText.setString("Dijkstra");
     
     this->algoAStarText.setFont(this->font);
     this->algoAStarText.setCharacterSize(20);
-    this->algoAStarText.setPosition(sf::Vector2f(50, 440));
+    this->algoAStarText.setPosition(sf::Vector2f(40, 450));
     this->algoAStarText.setString("A*");
     
     this->algoDumbyText.setFont(this->font);
     this->algoDumbyText.setCharacterSize(20);
-    this->algoDumbyText.setPosition(sf::Vector2f(50, 480));
+    this->algoDumbyText.setPosition(sf::Vector2f(40, 490));
     this->algoDumbyText.setString("Dumby");
     
     this->algoSummaryText.setFont(this->font);
-    this->algoSummaryText.setCharacterSize(20);
-    this->algoSummaryText.setPosition(sf::Vector2f(250, 400));
+    this->algoSummaryText.setCharacterSize(15);
+    this->algoSummaryText.setPosition(sf::Vector2f(140, 200));
     
     this->solveBoxText.setFont(this->font);
     this->solveBoxText.setCharacterSize(20);
@@ -294,25 +308,25 @@ private:
     this->saveBoxText.setString("Save");
     
     this->algoDijkstraBox.setPosition(sf::Vector2f(30, 400));
-    this->algoDijkstraBox.setSize(sf::Vector2f(200, 40));
+    this->algoDijkstraBox.setSize(sf::Vector2f(100, 40));
     this->algoDijkstraBox.setFillColor(sf::Color(this->colButton));
     this->algoDijkstraBox.setOutlineColor(sf::Color::White);
     this->algoDijkstraBox.setOutlineThickness(1);
 
     this->algoAStarBox.setPosition(sf::Vector2f(30, 440));
-    this->algoAStarBox.setSize(sf::Vector2f(200, 40));
+    this->algoAStarBox.setSize(sf::Vector2f(100, 40));
     this->algoAStarBox.setFillColor(sf::Color(this->colButton));
     this->algoAStarBox.setOutlineColor(sf::Color::White);
     this->algoAStarBox.setOutlineThickness(1);
     
     this->algoDumbyBox.setPosition(sf::Vector2f(30, 480));
-    this->algoDumbyBox.setSize(sf::Vector2f(200, 40));
+    this->algoDumbyBox.setSize(sf::Vector2f(100, 40));
     this->algoDumbyBox.setFillColor(sf::Color(this->colButton));
     this->algoDumbyBox.setOutlineColor(sf::Color::White);
     this->algoDumbyBox.setOutlineThickness(1);
     
     this->solveBox.setPosition(sf::Vector2f(30, 800));
-    this->solveBox.setSize(sf::Vector2f(200, 30));
+    this->solveBox.setSize(sf::Vector2f(100, 30));
     this->solveBox.setFillColor(sf::Color(this->colButton));
     this->solveBox.setOutlineColor(sf::Color::White);
     this->solveBox.setOutlineThickness(1);
@@ -361,12 +375,8 @@ private:
           this->window->close();
           break;
         case sf::Event::KeyPressed:
-          if (this->event.key.code == sf::Keyboard::Escape) this->window->close();
-          else
-          {
-            this->stateEngine.setState(StateEngine::states::build, this->window);
-            this->welcomeShader.setFillColor(sf::Color::Transparent);
-          }
+          if (this->event.key.code == sf::Keyboard::Escape) this->stateEngine.setState(StateEngine::build, this->window);
+          if (this->event.key.code == sf::Keyboard::Space) this->nextWelcomeSlide();
         default: break;
       }
     }
@@ -396,6 +406,23 @@ private:
   void updateMouse() {
     this->mousePosView = sf::Mouse::getPosition(*this->window);
     this->mousePosWindow = this->window->mapPixelToCoords(this->mousePosView);
+  }
+  
+  void nextWelcomeSlide() {
+    this->welcomeSlideNum++;
+    switch (this->welcomeSlideNum)
+    {
+      case 1:
+        this->welcomeText.setString("2");
+        break;
+      case 2:
+        this->welcomeText.setString("3");
+        break;
+    }
+    if (this->welcomeSlideNum >= 3)
+    {
+      this->stateEngine.setState(StateEngine::build, this->window);
+    }
   }
   
   void updateUI() {
@@ -497,7 +524,7 @@ private:
       if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
       {
         this->saveBox.setFillColor(this->colButtonClick);
-        this->saveGridToFile("default_grid.txt");
+        this->saveGridToFile("test_grid.txt");
       }
     }
     else
@@ -547,15 +574,15 @@ private:
     switch (this->algorithm)
     {
       case algorithms::dijkstra:
-        this->algoSummaryText.setString("This is Dijkstra's algorithm");
+        this->algoSummaryText.setString("Dijkstra'a algorithm searches each neighboring tile blind\nto where the end tile is located. The tiles farther away\nfrom the start cost more than closer tiles. Once it finds\nthe end tile, it follows the lowest cost tiles back to the\nstart tile. Dijkstra's is useful for when you don't know\nthe location of the end tile.");
         this->algoDijkstraBox.setFillColor(sf::Color(this->colButtonActive));
         break;
       case algorithms::aStar:
-        this->algoSummaryText.setString("AStar is best");
+        this->algoSummaryText.setString("The Alpha Star algorithm searches within a group of\ntiles that are reachable from the start tile. Each tile in\nthe group has a cost associated with it. The cost is\nthe sum of the distance from the start tile and the\ndistance from the end tile. Each iteration it picks the\ntile in the group with the lowest cost and adds its\nneighbors to the group, calculating their cost, then\nremoves the current tile from the group and marking it\nas closed. When the end tile is found, it follows the\nclosed tiles with the lowest cost back to the start tile.\nAlpha Star is very efficient, but can only be used when\nthe location of the end tile is known");
         this->algoAStarBox.setFillColor(sf::Color(this->colButtonActive));
         break;
       case algorithms::dumby:
-        this->algoSummaryText.setString("Dumby sucks");
+        this->algoSummaryText.setString("The Dumby algorithm simply searches the tile above\nthe current tile. If it is blocked, it searches to the right.\nThen down, then to the left. Once the end tile is found,\nit traces the path it took back to the start tile.\nThe Dumby algorithm is very inefficient and it not\nespecially useful, but it can be used when the location\nof the end tile is unknown.");
         this->algoDumbyBox.setFillColor(sf::Color(this->colButtonActive));
         break;
     }
@@ -597,6 +624,13 @@ private:
   }  
 
   void renderUI() {
+    if (this->stateEngine.state == StateEngine::welcome)
+    {
+      this->window->draw(this->welcomeShader);
+      this->window->draw(this->welcomeTitle);
+      this->window->draw(this->welcomeText);
+    }
+
     this->window->draw(this->sliderOutline);
     this->window->draw(this->sliderBox);
     this->window->draw(this->algoDijkstraBox);
@@ -617,7 +651,6 @@ private:
     this->window->draw(this->resetBoxText);
     this->window->draw(this->saveBoxText);
 
-    this->window->draw(this->welcomeShader);
   }
   
   void updateTiles() {
@@ -701,10 +734,6 @@ private:
                 this->prevEndCoords[0] = this->endTile->getCoords(0);
                 this->prevEndCoords[1] = this->endTile->getCoords(1);
                 this->endTile = currentTile;
-              }
-              else
-              {
-                currentTile->setState(Tile::states::wall);
               }
             }
             else if (currentState == Tile::start)
@@ -795,14 +824,14 @@ private:
       {
         file >> fileState;
         this->grid[j][i]->setState(fileState);
-        if (fileState == 1)
+        if (fileState == 3)
         {
           this->startTile = grid[j][i];
           // this->startTile->setValue(0);
           // this->unvisitedTiles.push_back(*this->startTile);
           // this->visitedTilesInOrder.push_back(*this->startTile);
         }
-        else if (fileState == 2)
+        else if (fileState == 4)
         {
           this->endTile = grid[j][i];
         }
