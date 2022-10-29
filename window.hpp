@@ -21,7 +21,6 @@ public:
     solving,
     solved,
     buildSolved
-    // secondSolved
   } state = welcome;
 
   void setState(states newState, sf::RenderWindow *window) {
@@ -142,7 +141,7 @@ public:
   
   
   void render() {
-    this->window->clear();
+    this->window->clear(sf::Color(17, 19, 20, 255));
     
     this->renderBoxes();
     this->renderUI();
@@ -195,6 +194,7 @@ private:
   
   sf::Text welcomeTitle;
   sf::Text welcomeText;
+  sf::Text welcomeContinueText;
   
   sf::Text sliderText;
   sf::Text sliderNums;
@@ -233,8 +233,8 @@ private:
     this->window = nullptr;
     
     //ui
-    this->welcomeShader.setSize(sf::Vector2f(1500, 1000));
-    this->welcomeShader.setFillColor(sf::Color(0, 0, 0, 225));
+    this->welcomeShader.setSize(sf::Vector2f(1600, 1000));
+    this->welcomeShader.setFillColor(sf::Color(35, 35, 35, 245));
     
     this->sliderOutline.setPosition(sf::Vector2f(30, 15));
     this->sliderOutline.setSize(sf::Vector2f(400, 30));
@@ -255,8 +255,13 @@ private:
     
     this->welcomeText.setFont(this->font);
     this->welcomeText.setCharacterSize(18);
-    this->welcomeText.setPosition(sf::Vector2f(50, 50));
+    this->welcomeText.setPosition(sf::Vector2f(50, 200));
     this->welcomeText.setString("This simple program allows you to visualize how different pathfinding algoriths work. You can draw and erase obsticles on a grid and move the stating and ending tiles");
+    
+    this->welcomeContinueText.setFont(this->font);
+    this->welcomeContinueText.setCharacterSize(17);
+    this->welcomeContinueText.setPosition(sf::Vector2f(450, 850));
+    this->welcomeContinueText.setString("Press Space to continue or press Escape to skip the tutorial");
     
     this->sliderText.setFont(this->font);
     this->sliderText.setCharacterSize(20);
@@ -271,7 +276,7 @@ private:
     this->algorithmsText.setFont(this->font);
     this->algorithmsText.setCharacterSize(20);
     this->algorithmsText.setPosition(sf::Vector2f(30, 350));
-    this->algorithmsText.setString("Algorithms");
+    this->algorithmsText.setString("Algorithms:");
     
     this->algoDijkstraText.setFont(this->font);
     this->algoDijkstraText.setCharacterSize(20);
@@ -290,7 +295,7 @@ private:
     
     this->algoSummaryText.setFont(this->font);
     this->algoSummaryText.setCharacterSize(15);
-    this->algoSummaryText.setPosition(sf::Vector2f(140, 200));
+    this->algoSummaryText.setPosition(sf::Vector2f(160, 350));
     
     this->solveBoxText.setFont(this->font);
     this->solveBoxText.setCharacterSize(20);
@@ -351,16 +356,16 @@ private:
       }
     }
     
-    // std::string gridFile = "";
-    // std::cout << "File to load grid from (leave blank to load default grid)\n> "; std::cin >> gridFile;
-    // if (gridFile == "") this->loadGridFromFile("default_grid.txt");
-    // else this->loadGridFromFile(gridFile);
-    this->loadGridFromFile("default_grid.txt");
+    std::string gridFile = "";
+    std::cout << "File to load grid from (enter 1 to load default grid)\n> "; std::cin >> gridFile;
+    if (gridFile == "1") this->loadGridFromFile("default_grid.txt");
+    else this->loadGridFromFile(gridFile);
+    // this->loadGridFromFile("default_grid.txt");
   }
   
   void initWindow() {
     this->videoMode.height = 1000;
-    this->videoMode.width = 1500;
+    this->videoMode.width = 1600;
     
     this->window = new sf::RenderWindow(this->videoMode, "Pathfinding Visualizer");
     this->window->setFramerateLimit(60);
@@ -413,10 +418,10 @@ private:
     switch (this->welcomeSlideNum)
     {
       case 1:
-        this->welcomeText.setString("2");
+        this->welcomeText.setString("Left click to place obsticles");
         break;
       case 2:
-        this->welcomeText.setString("3");
+        this->welcomeText.setString("Right click to remove obsticles");
         break;
     }
     if (this->welcomeSlideNum >= 3)
@@ -507,10 +512,7 @@ private:
         this->resetBox.setFillColor(this->colButtonClick);
         this->loadGridFromFile("default_grid.txt");
         
-        if (this->stateEngine.state == StateEngine::buildSolved)
-        {
-          this->stateEngine.setState(StateEngine::build, this->window);
-        }
+        this->stateEngine.setState(StateEngine::build, this->window);
       }
     }
     else
@@ -624,13 +626,6 @@ private:
   }  
 
   void renderUI() {
-    if (this->stateEngine.state == StateEngine::welcome)
-    {
-      this->window->draw(this->welcomeShader);
-      this->window->draw(this->welcomeTitle);
-      this->window->draw(this->welcomeText);
-    }
-
     this->window->draw(this->sliderOutline);
     this->window->draw(this->sliderBox);
     this->window->draw(this->algoDijkstraBox);
@@ -650,6 +645,14 @@ private:
     this->window->draw(this->solveBoxText);
     this->window->draw(this->resetBoxText);
     this->window->draw(this->saveBoxText);
+
+    if (this->stateEngine.state == StateEngine::welcome)
+    {
+      this->window->draw(this->welcomeShader);
+      this->window->draw(this->welcomeTitle);
+      this->window->draw(this->welcomeText);
+      this->window->draw(this->welcomeContinueText);
+    }
 
   }
   
@@ -804,7 +807,7 @@ private:
     {
       for (int j=0; j<50; j++)
       {
-        file << this->grid[j][i]->getState() << " ";
+        file << this->grid[j][i]->getStateInt() << " ";
       }
       file << std::endl;
     }
@@ -824,14 +827,14 @@ private:
       {
         file >> fileState;
         this->grid[j][i]->setState(fileState);
-        if (fileState == 3)
+        if (fileState == 1)
         {
           this->startTile = grid[j][i];
           // this->startTile->setValue(0);
           // this->unvisitedTiles.push_back(*this->startTile);
           // this->visitedTilesInOrder.push_back(*this->startTile);
         }
-        else if (fileState == 4)
+        else if (fileState == 2)
         {
           this->endTile = grid[j][i];
         }

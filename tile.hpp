@@ -11,7 +11,7 @@ public:
     this->coords[1] = y;
     // this->index = (10 * x) + y;
     this->box.setSize(sf::Vector2f(BOX_SIZE, BOX_SIZE));
-    this->box.setPosition(sf::Vector2f(500 + x*BOX_SIZE, y*BOX_SIZE));
+    this->box.setPosition(sf::Vector2f(600 + x*BOX_SIZE, y*BOX_SIZE));
     this->box.setFillColor(sf::Color(80, 80, 80, 255));
     this->box.setOutlineThickness(1);
     this->box.setOutlineColor(sf::Color::Black);
@@ -78,15 +78,15 @@ public:
       //   this->state = empty;
       //   this->box.setFillColor(sf::Color(80, 80, 80, 255));
       //   break;
-      case 3:
+      case 1:
         this->state = start;
         this->box.setFillColor(sf::Color::Green);
         break;
-      case 4:
+      case 2:
         this->state = end;
         this->box.setFillColor(sf::Color::Red);
         break;
-      case 2:
+      case 3:
         this->state = wall;
         this->box.setFillColor(sf::Color(12, 12, 12, 255));
         break;
@@ -139,29 +139,23 @@ public:
   
   states getState() { return this->state; }
   
-  // int getStateInt() {
-  //   switch (this->state)
-  //   {
-  //     case empty:
-  //       return 0;
-  //       break;
-  //     case start:
-  //       return 1;
-  //       break;
-  //     case end:
-  //       return 2;
-  //       break;
-  //     case wall:
-  //       return 3;
-  //       break;
-  //     // case visited:
-  //     //   return 5;
-  //     //   break;
-  //     default:
-  //       return 0;
-  //       break;
-  //   }
-  // }
+  int getStateInt() {
+    switch (this->state)
+    {
+      case start:
+        return 1;
+        break;
+      case end:
+        return 2;
+        break;
+      case wall:
+        return 3;
+        break;
+      default:
+        return 0;
+        break;
+    }
+  }
 
   void setValue(int newValue) { this->value = newValue; }
   void setValue(int gValue, int hValue) {
