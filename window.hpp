@@ -1,3 +1,4 @@
+#include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/VideoMode.hpp>
@@ -12,9 +13,6 @@
 
 class StateEngine {
 public:
-  // StateEngine();
-  // ~StateEngine();
-
   enum states {
     welcome,
     build,
@@ -26,46 +24,28 @@ public:
   void setState(states newState, sf::RenderWindow *window) {
     if (this->state == welcome && newState == build)
     {
-      std::cout << "building\n";
       this->state = build;
     }
     else if (this->state == build && newState == solving)
     {
-      // window->setFramerateLimit(1);
       this->state = solving;
-      std::cout << "solving\n";
     }
     else if (this->state == solving && newState == solved)
     {
-      std::cout << "solved\n";
       window->setFramerateLimit(this->framerateLimit);
       this->state = solved;
     }
-    // else if (this->state == solved && newState == build)
-    // {
-    //   std::cout << "building\n";
-    //   window->setFramerateLimit(60);
-    //   this->state = build;
-    // }
     else if (this->state == solved && newState == buildSolved)
     {
-      std::cout << "building after solve\n";
       window->setFramerateLimit(60);
       this->state = buildSolved;
     }
     else if (this->state == buildSolved && newState == solved)
     {
-      std::cout << "2nd solve\n";
       this->state = solved;
     }
-    // else if (this->state == secondSolved && newState == buildSolved)
-    // {
-    //   std::cout << "building after solve\n";
-    //   this->state = buildSolved;
-    // }
     else if (this->state == buildSolved && newState == build)
     {
-      std::cout << "resetting";
       this->state = build;
     }
   }
@@ -134,14 +114,13 @@ public:
         this->updateMouse();
         this->updateUISolved();
         this->updateTilesSolved();
-        // this->clearGrid();
         break;
     }
   }
   
   
   void render() {
-    this->window->clear(sf::Color(17, 19, 20, 255));
+    this->window->clear(sf::Color(17, 20, 26, 255));
     
     this->renderBoxes();
     this->renderUI();
@@ -169,8 +148,6 @@ private:
   int solvingStep;
   int animationStep = 0;
   
-  // bool solved = false;
-  
   bool solveInstant;
   bool drawnVisited = false;
   
@@ -180,6 +157,20 @@ private:
   //ui
   int welcomeSlideNum = 0;
   sf::RectangleShape welcomeShader;
+  sf::Texture txPlaceWalls;
+  sf::Texture txEraseWalls;
+  sf::Texture txMoveStartEnd;
+  sf::Texture txSolveSpeed;
+  sf::Texture txAlgo;
+  sf::Texture txSolve;
+  sf::Texture txMoveAfterSolve;
+  sf::Sprite spPlaceWalls;
+  sf::Sprite spEraseWalls;
+  sf::Sprite spMoveStartEnd;
+  sf::Sprite spSolveSpeed;
+  sf::Sprite spAlgo;
+  sf::Sprite spSolve;
+  sf::Sprite spMoveAfterSolve;
   
   sf::RectangleShape sliderOutline;
   sf::RectangleShape sliderBox;
@@ -213,10 +204,10 @@ private:
   
   int animationCoords[2];
   
-  const sf::Color colButton = sf::Color(30, 20, 20, 255);
+  const sf::Color colButton = sf::Color(29, 22, 22, 255);
   const sf::Color colButtonHighlight = sf::Color(40, 30, 30, 255);
   const sf::Color colButtonClick = sf::Color(50, 40, 40, 255);
-  const sf::Color colButtonActive = sf::Color(60, 50, 50, 255);
+  const sf::Color colButtonActive = sf::Color(70, 50, 48, 255);
   
   //mouse
   sf::Vector2i mousePosView;
@@ -246,21 +237,50 @@ private:
     this->sliderBox.setSize(sf::Vector2f(20, 20));
     this->sliderBox.setFillColor(sf::Color::White);
     
-    if (!font.loadFromFile("resources/Roboto/Roboto-Regular.ttf")) std::cout << "Failed to load font from file";
+    if (!this->txPlaceWalls.loadFromFile("resources/tutorial_pictures/placing_walls.png")) std::cout << "Failed to load 'placing_walls.png'";
+    this->spPlaceWalls.setTexture(this->txPlaceWalls);
+    this->spPlaceWalls.setScale(sf::Vector2f(0.75, 0.75));
+    this->spPlaceWalls.setPosition(9000, 9000);
+    if (!this->txEraseWalls.loadFromFile("resources/tutorial_pictures/erasing_walls.png")) std::cout << "Failed to load 'erasing_walls.png'";
+    this->spEraseWalls.setTexture(this->txEraseWalls);
+    this->spEraseWalls.setScale(sf::Vector2f(0.75, 0.75));
+    this->spEraseWalls.setPosition(9000, 9000);
+    if (!this->txMoveStartEnd.loadFromFile("resources/tutorial_pictures/moving_startandend.png")) std::cout << "Failed to load 'moving_startandend.png'";
+    this->spMoveStartEnd.setTexture(this->txMoveStartEnd);
+    this->spMoveStartEnd.setScale(sf::Vector2f(0.75, 0.75));
+    this->spMoveStartEnd.setPosition(9000, 9000);
+    if (!this->txSolveSpeed.loadFromFile("resources/tutorial_pictures/animation_speed.png")) std::cout << "Failed to load 'animation_speed.png'";
+    this->spSolveSpeed.setTexture(this->txSolveSpeed);
+    this->spSolveSpeed.setScale(sf::Vector2f(0.75, 0.75));
+    this->spSolveSpeed.setPosition(9000, 9000);
+    if (!this->txAlgo.loadFromFile("resources/tutorial_pictures/choose_algo.png")) std::cout << "Failed to load 'choose_algo.png'";
+    this->spAlgo.setTexture(this->txAlgo);
+    this->spAlgo.setScale(sf::Vector2f(0.75, 0.75));
+    this->spAlgo.setPosition(9000, 9000);
+    if (!this->txSolve.loadFromFile("resources/tutorial_pictures/solve.png")) std::cout << "Failed to load 'solve.png'";
+    this->spSolve.setTexture(this->txSolve);
+    this->spSolve.setScale(sf::Vector2f(0.75, 0.75));
+    this->spSolve.setPosition(9000, 9000);
+    if (!this->txMoveAfterSolve.loadFromFile("resources/tutorial_pictures/moving.png")) std::cout << "Failed to load 'moving.png'";
+    this->spMoveAfterSolve.setTexture(this->txMoveAfterSolve);
+    this->spMoveAfterSolve.setScale(sf::Vector2f(0.75, 0.75));
+    this->spMoveAfterSolve.setPosition(9000, 9000);
+    
+    if (!this->font.loadFromFile("resources/Roboto/Roboto-Regular.ttf")) std::cout << "Failed to load font from file";
 
     this->welcomeTitle.setFont(this->font);
     this->welcomeTitle.setCharacterSize(30);
-    this->welcomeTitle.setPosition(sf::Vector2f(500, 10));
+    this->welcomeTitle.setPosition(sf::Vector2f(550, 10));
     this->welcomeTitle.setString("Pathfinding Algorithm Visualizer");
     
     this->welcomeText.setFont(this->font);
     this->welcomeText.setCharacterSize(18);
-    this->welcomeText.setPosition(sf::Vector2f(50, 200));
+    this->welcomeText.setPosition(sf::Vector2f(60, 200));
     this->welcomeText.setString("This simple program allows you to visualize how different pathfinding algoriths work. You can draw and erase obsticles on a grid and move the stating and ending tiles");
     
     this->welcomeContinueText.setFont(this->font);
     this->welcomeContinueText.setCharacterSize(17);
-    this->welcomeContinueText.setPosition(sf::Vector2f(450, 850));
+    this->welcomeContinueText.setPosition(sf::Vector2f(500, 850));
     this->welcomeContinueText.setString("Press Space to continue or press Escape to skip the tutorial");
     
     this->sliderText.setFont(this->font);
@@ -360,7 +380,6 @@ private:
     std::cout << "File to load grid from (enter 1 to load default grid)\n> "; std::cin >> gridFile;
     if (gridFile == "1") this->loadGridFromFile("default_grid.txt");
     else this->loadGridFromFile(gridFile);
-    // this->loadGridFromFile("default_grid.txt");
   }
   
   void initWindow() {
@@ -395,14 +414,6 @@ private:
         case sf::Event::Closed:
           this->window->close();
           break;
-        case sf::Event::KeyPressed:
-          if (this->event.key.code == sf::Keyboard::Escape)
-            this->window->close();
-          if (this->event.key.code == sf::Keyboard::A)
-            this->stateEngine.setState(StateEngine::states::solving, this->window);
-          if (this->event.key.code == sf::Keyboard::S)
-            this->clearGrid();
-          break;
         default: break;
       }
     }
@@ -418,13 +429,40 @@ private:
     switch (this->welcomeSlideNum)
     {
       case 1:
-        this->welcomeText.setString("Left click to place obsticles");
+        this->welcomeText.setString("Left click to place obsticles                                                Right click to remove obsticles");
+        this->welcomeText.setPosition(sf::Vector2f(25, 200));
+        this->spPlaceWalls.setPosition(sf::Vector2f(100, 100));
+        this->spEraseWalls.setPosition(sf::Vector2f(500, 100));
         break;
       case 2:
-        this->welcomeText.setString("Right click to remove obsticles");
+        this->spPlaceWalls.setPosition(sf::Vector2f(9000, 9000));
+        this->spEraseWalls.setPosition(sf::Vector2f(9000, 9000));
+        this->welcomeText.setString("Left click drag on the start (green) and end (red) tiles to move them");
+        this->welcomeText.setPosition(sf::Vector2f(50, 200));
+        this->spMoveStartEnd.setPosition(sf::Vector2f(100, 100));
+        break;
+      case 3:
+        this->spMoveStartEnd.setPosition(sf::Vector2f(9000, 9000));
+        this->welcomeText.setString("Select speed to visualize the algorithm");
+        this->spSolveSpeed.setPosition(sf::Vector2f(100, 100));
+        break;
+      case 4:
+        this->spSolveSpeed.setPosition(sf::Vector2f(9000, 9000));
+        this->welcomeText.setString("Choose which algorithm you want to see");
+        this->spAlgo.setPosition(sf::Vector2f(100, 100));
+        break;
+      case 5:
+        this->spAlgo.setPosition(sf::Vector2f(9000, 9000));
+        this->welcomeText.setString("Solve");
+        this->spSolve.setPosition(sf::Vector2f(100, 100));
+        break;
+      case 6:
+        this->spSolve.setPosition(sf::Vector2f(9000, 9000));
+        this->welcomeText.setString("Moving the start or end tiles after the solve will update the shortest path in real time");
+        this->spMoveAfterSolve.setPosition(sf::Vector2f(100, 100));
         break;
     }
-    if (this->welcomeSlideNum >= 3)
+    if (this->welcomeSlideNum >= 7)
     {
       this->stateEngine.setState(StateEngine::build, this->window);
     }
@@ -591,19 +629,7 @@ private:
   }
 
   void updateUISolved() {
-    if (this->solveBox.getGlobalBounds().contains(this->mousePosWindow))
-    {
-      this->solveBox.setFillColor(sf::Color(this->colButtonHighlight));
-      if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-      {
-        this->solveBox.setFillColor(this->colButtonClick);
-        this->stateEngine.setState(StateEngine::states::solving, this->window);
-      }
-    }
-    else
-    {
-      this->solveBox.setFillColor(sf::Color(this->colButton));
-    }
+    this->solveBox.setFillColor(sf::Color(this->colButton));
 
     if (this->resetBox.getGlobalBounds().contains(this->mousePosWindow))
     {
@@ -652,6 +678,13 @@ private:
       this->window->draw(this->welcomeTitle);
       this->window->draw(this->welcomeText);
       this->window->draw(this->welcomeContinueText);
+      this->window->draw(this->spPlaceWalls);
+      this->window->draw(this->spEraseWalls);
+      this->window->draw(this->spMoveStartEnd);
+      this->window->draw(this->spSolveSpeed);
+      this->window->draw(this->spAlgo);
+      this->window->draw(this->spSolve);
+      this->window->draw(this->spMoveAfterSolve);
     }
 
   }
@@ -704,7 +737,6 @@ private:
         }
         else
         {
-          // if (currentState == Tile::hovered) currentTile->setState(Tile::empty);
           if (currentState == Tile::hovered || currentState == Tile::start || currentState == Tile::end) currentTile->setState(Tile::empty);
         }
       }
@@ -756,16 +788,8 @@ private:
         }
         else
         {
-          // if (currentState == Tile::hovered) currentTile->setState(Tile::empty);
           if (currentState == Tile::start || currentState == Tile::end) currentTile->setState(Tile::empty);
         }
-        // this->startTile->setState(Tile::start);
-        // this->endTile->setState(Tile::end);
-        // if (this->movingStartTile || this->movingEndTile)
-        // {
-        //   this->stateEngine.setState(StateEngine::solving, this->window);
-        //   // this->solve();
-        // }
       }
     }
 
@@ -777,9 +801,6 @@ private:
       if ((this->startTile->getCoords(0) != this->prevStartCoords[0] && this->startTile->getCoords(1) != this->prevStartCoords[1]) || (this->endTile->getCoords(0) != this->prevEndCoords[0] && this->endTile->getCoords(1) != this->prevEndCoords[1]))
       {
         this->clearGrid();
-        std::cout << "doing 2nd solve\n";
-
-        // this->stateEngine.setState(StateEngine::solving, this->window);
 
         this->solve();
         this->resetTileColors();
@@ -830,9 +851,6 @@ private:
         if (fileState == 1)
         {
           this->startTile = grid[j][i];
-          // this->startTile->setValue(0);
-          // this->unvisitedTiles.push_back(*this->startTile);
-          // this->visitedTilesInOrder.push_back(*this->startTile);
         }
         else if (fileState == 2)
         {
@@ -844,8 +862,6 @@ private:
   }
   
   void clearGrid() {
-    // this->startTile->setValue(0);
-    // this->visitedTilesInOrder.push_back(*this->startTile);
     for (int i=0; i<50; i++)
     {
       for (int j=0; j<50; j++)
@@ -858,7 +874,6 @@ private:
   }
   
   void solveDijkstra() {
-    // if (this->stateEngine.state != StateEngine::solved || this->stateEngine.state != StateEngine::secondSolved)
     if (this->stateEngine.state != StateEngine::solved)
     {
       std::vector<Tile> neighborTiles;
@@ -875,7 +890,6 @@ private:
           switch (up->getState())
           {
             case Tile::states::end:
-              // this->endTile->setPrevTile(up);
               this->endTile->setPrevCoords(xCoord, yCoord);
               this->animationCoords[0] = xCoord;
               this->animationCoords[1] = yCoord;
@@ -883,8 +897,6 @@ private:
               break;
             case Tile::states::empty:
               up->setState(Tile::states::checked);
-              // up->setValue(checkedTile->getValue() + 1);
-              // up->setPrevTile(checkedTile);
               up->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
               neighborTiles.push_back(*up);
               this->visitedTilesInOrder.push_back(*up);
@@ -900,7 +912,6 @@ private:
           switch (right->getState())
           {
             case Tile::states::end:
-              // this->endTile->setPrevTile(right);
               this->endTile->setPrevCoords(xCoord, yCoord);
               this->animationCoords[0] = xCoord;
               this->animationCoords[1] = yCoord;
@@ -908,8 +919,6 @@ private:
               break;
             case Tile::states::empty:
               right->setState(Tile::states::checked);
-              // right->setValue(checkedTile->getValue() + 1);
-              // right->setPrevTile(checkedTile);
               right->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
               neighborTiles.push_back(*right);
               this->visitedTilesInOrder.push_back(*right);
@@ -925,7 +934,6 @@ private:
           switch (down->getState())
           {
             case Tile::states::end:
-              // this->endTile->setPrevTile(down);
               this->endTile->setPrevCoords(xCoord, yCoord);
               this->animationCoords[0] = xCoord;
               this->animationCoords[1] = yCoord;
@@ -933,8 +941,6 @@ private:
               break;
             case Tile::states::empty:
               down->setState(Tile::states::checked);
-              // down->setValue(checkedTile->getValue() + 1);
-              // down->setPrevTile(checkedTile);
               down->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
               neighborTiles.push_back(*down);
               this->visitedTilesInOrder.push_back(*down);
@@ -950,7 +956,6 @@ private:
           switch (left->getState())
           {
             case Tile::states::end:
-              // this->endTile->setPrevTile(left);
               this->endTile->setPrevCoords(xCoord, yCoord);
               this->animationCoords[0] = xCoord;
               this->animationCoords[1] = yCoord;
@@ -958,8 +963,6 @@ private:
               break;
             case Tile::states::empty:
               left->setState(Tile::states::checked);
-              // left->setValue(checkedTile->getValue() + 1);
-              // left->setPrevTile(checkedTile);
               left->setPrevCoords(checkedTile->getCoords(0), checkedTile->getCoords(1)); 
               neighborTiles.push_back(*left);
               this->visitedTilesInOrder.push_back(*left);
@@ -985,7 +988,6 @@ private:
   void solveAStar() {
     if (this->stateEngine.state != StateEngine::solved)
     {
-      // std::vector<Tile> neighborTiles;
       int xCoord = this->currentTile->getCoords(0);
       int yCoord = this->currentTile->getCoords(1);
     
@@ -995,7 +997,6 @@ private:
         switch (up->getState())
         {
           case Tile::states::end:
-            // this->endTile->setPrevTile(up);
             this->endTile->setPrevCoords(xCoord, yCoord);
             this->animationCoords[0] = xCoord;
             this->animationCoords[1] = yCoord;
@@ -1004,10 +1005,7 @@ private:
           case Tile::states::empty:
             up->setState(Tile::states::checked);
             up->setValue(this->solvingStep*10, this->calcHValue(xCoord, (yCoord - 1)));
-            // up->setValue(this->solvingStep*10);
-            // up->setPrevTile(checkedTile);
             up->setPrevCoords(xCoord, yCoord); 
-            // this->unvisitedTiles.push_back(*up);
             this->visitedTilesInOrder.push_back(*up);
             break;
           default:
@@ -1021,7 +1019,6 @@ private:
         switch (right->getState())
         {
           case Tile::states::end:
-            // this->endTile->setPrevTile(right);
             this->endTile->setPrevCoords(xCoord, yCoord);
             this->animationCoords[0] = xCoord;
             this->animationCoords[1] = yCoord;
@@ -1030,10 +1027,7 @@ private:
           case Tile::states::empty:
             right->setState(Tile::states::checked);
             right->setValue(this->solvingStep*10, this->calcHValue((xCoord + 1), yCoord));
-            // right->setValue(this->solvingStep*10);
-            // right->setPrevTile(checkedTile);
             right->setPrevCoords(xCoord, yCoord); 
-            // this->unvisitedTiles.push_back(*right);
             this->visitedTilesInOrder.push_back(*right);
             break;
           default:
@@ -1047,7 +1041,6 @@ private:
         switch (down->getState())
         {
           case Tile::states::end:
-            // this->endTile->setPrevTile(down);
             this->endTile->setPrevCoords(xCoord, yCoord);
             this->animationCoords[0] = xCoord;
             this->animationCoords[1] = yCoord;
@@ -1056,10 +1049,7 @@ private:
           case Tile::states::empty:
             down->setState(Tile::states::checked);
             down->setValue(this->solvingStep*10, this->calcHValue(xCoord, (yCoord + 1)));
-            // down->setValue(this->solvingStep*10);
-            // down->setPrevTile(checkedTile);
             down->setPrevCoords(xCoord, yCoord); 
-            // this->unvisitedTiles.push_back(*down);
             this->visitedTilesInOrder.push_back(*down);
             break;
           default:
@@ -1073,7 +1063,6 @@ private:
         switch (left->getState())
         {
           case Tile::states::end:
-            // this->endTile->setPrevTile(left);
             this->endTile->setPrevCoords(xCoord, yCoord);
             this->animationCoords[0] = xCoord;
             this->animationCoords[1] = yCoord;
@@ -1082,36 +1071,13 @@ private:
           case Tile::states::empty:
             left->setState(Tile::states::checked);
             left->setValue(this->solvingStep*10, this->calcHValue((xCoord - 1), yCoord));
-            // left->setValue(this->solvingStep*10);
-            // left->setPrevTile(checkedTile);
             left->setPrevCoords(xCoord, yCoord); 
-            // this->unvisitedTiles.push_back(*left);
             this->visitedTilesInOrder.push_back(*left);
             break;
           default:
             break;
         }
       }
-    
-      // int runningFCost = 99999;
-      // int bestIndex;
-      // Tile *bestTile;
-      // for (int i=0; i<this->unvisitedTiles.size(); i++)
-      // {
-      //   int currentFCost = this->unvisitedTiles[i].getValue();
-      //   if (currentFCost < runningFCost)
-      //   {
-      //     runningFCost = currentFCost;
-      //     bestTile = &this->unvisitedTiles[i];
-      //     bestIndex = i;
-      //   } 
-      // }
-      // this->currentTile = bestTile;
-      // this->unvisitedTiles.erase(this->unvisitedTiles.begin() + bestIndex);
-    
-      // this->solvingStep++;
-    
-      // std::cout << this->currentTile->getValue() << std::endl;
     
       int bestFCost = 99999;
       Tile *bestTile;
@@ -1135,8 +1101,6 @@ private:
       this->currentTile = bestTile;
 
       this->solveAStar();
-      
-      // this->unvisitedTiles.clear();
     }
   }
   
@@ -1153,7 +1117,6 @@ private:
         switch (left->getState())
         {
           case Tile::states::end:
-            // this->endTile->setPrevTile(left);
             this->endTile->setPrevCoords(xCoord, yCoord);
             this->animationCoords[0] = xCoord;
             this->animationCoords[1] = yCoord;
@@ -1161,8 +1124,6 @@ private:
             break;
           case Tile::states::empty:
             left->setState(Tile::states::checked);
-            // left->setValue(1, this->calcHValue(xCoord, (yCoord - 1)));
-            // left->setPrevTile(checkedTile);
             left->setPrevCoords(xCoord, yCoord); 
             neighborTiles.push_back(*left);
             this->visitedTilesInOrder.push_back(*left);
@@ -1179,7 +1140,6 @@ private:
         switch (down->getState())
         {
           case Tile::states::end:
-            // this->endTile->setPrevTile(down);
             this->endTile->setPrevCoords(xCoord, yCoord);
             this->animationCoords[0] = xCoord;
             this->animationCoords[1] = yCoord;
@@ -1187,8 +1147,6 @@ private:
             break;
           case Tile::states::empty:
             down->setState(Tile::states::checked);
-            // down->setValue(1, this->calcHValue(xCoord, (yCoord - 1)));
-            // down->setPrevTile(checkedTile);
             down->setPrevCoords(xCoord, yCoord); 
             neighborTiles.push_back(*down);
             this->visitedTilesInOrder.push_back(*down);
@@ -1205,7 +1163,6 @@ private:
         switch (right->getState())
         {
           case Tile::states::end:
-            // this->endTile->setPrevTile(right);
             this->endTile->setPrevCoords(xCoord, yCoord);
             this->animationCoords[0] = xCoord;
             this->animationCoords[1] = yCoord;
@@ -1213,8 +1170,6 @@ private:
             break;
           case Tile::states::empty:
             right->setState(Tile::states::checked);
-            // right->setValue(1, this->calcHValue(xCoord, (yCoord - 1)));
-            // right->setPrevTile(checkedTile);
             right->setPrevCoords(xCoord, yCoord); 
             neighborTiles.push_back(*right);
             this->visitedTilesInOrder.push_back(*right);
@@ -1231,7 +1186,6 @@ private:
         switch (up->getState())
         {
           case Tile::states::end:
-            // this->endTile->setPrevTile(up);
             this->endTile->setPrevCoords(xCoord, yCoord);
             this->animationCoords[0] = xCoord;
             this->animationCoords[1] = yCoord;
@@ -1239,8 +1193,6 @@ private:
             break;
           case Tile::states::empty:
             up->setState(Tile::states::checked);
-            // up->setValue(1, this->calcHValue(xCoord, (yCoord - 1)));
-            // up->setPrevTile(checkedTile);
             up->setPrevCoords(xCoord, yCoord); 
             neighborTiles.push_back(*up);
             this->visitedTilesInOrder.push_back(*up);
@@ -1275,7 +1227,7 @@ private:
     {
       this->animationStep = 0;
       this->visitedTilesInOrder.clear();
-      this->visitedTilesInOrder.push_back(*this->startTile);
+      // this->visitedTilesInOrder.push_back(*this->startTile);
       this->drawnVisited = true;
     }
   }
@@ -1283,6 +1235,7 @@ private:
   void animatePath() {
     if (this->animationCoords[0] == this->startTile->getCoords(0) && this->animationCoords[1] == this->startTile->getCoords(1))
     {
+      this->drawnVisited = false;
       this->stateEngine.setState(StateEngine::buildSolved, this->window);
     }
     
@@ -1308,15 +1261,6 @@ private:
 
     this->visitedTilesInOrder.clear();
     this->visitedTilesInOrder.push_back(*this->startTile);
-    
-    // int currentCoords[2] = { this->endTile->getPrevCoords(0), this->endTile->getPrevCoords(1) };
-    // while (currentCoords[0] != this->startTile->getCoords(0) || currentCoords[1] != this->startTile->getCoords(1))
-    // {
-    //   Tile *currentTile = this->grid[currentCoords[0]][currentCoords[1]];
-    //   currentTile->setState(Tile::states::path);
-    //   currentCoords[0] = currentTile->getPrevCoords(0);
-    //   currentCoords[1] = currentTile->getPrevCoords(1);
-    // }
     
     while (this->animationCoords[0] != this->startTile->getCoords(0) || this->animationCoords[1] != this->startTile->getCoords(1))
     {

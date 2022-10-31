@@ -9,14 +9,12 @@ public:
   Tile(int x, int y) {
     this->coords[0] = x;
     this->coords[1] = y;
-    // this->index = (10 * x) + y;
     this->box.setSize(sf::Vector2f(BOX_SIZE, BOX_SIZE));
     this->box.setPosition(sf::Vector2f(600 + x*BOX_SIZE, y*BOX_SIZE));
     this->box.setFillColor(sf::Color(80, 80, 80, 255));
     this->box.setOutlineThickness(1);
     this->box.setOutlineColor(sf::Color::Black);
   }
-  // ~Tile() { delete this; }
   
   enum states {
     empty,
@@ -74,10 +72,6 @@ public:
   void setState(int newState) {
     switch (newState)
     {
-      // case 0:
-      //   this->state = empty;
-      //   this->box.setFillColor(sf::Color(80, 80, 80, 255));
-      //   break;
       case 1:
         this->state = start;
         this->box.setFillColor(sf::Color::Green);
@@ -166,8 +160,6 @@ public:
   
   int getValue() { return this->value; }
   
-  // int getIndex() { return this->index; }
-  
   bool containsMouse(sf::Vector2f mousePos) { return this->box.getGlobalBounds().contains(mousePos); }
   
   void setPrevTile(Tile *prevTile) { this->prevTile = prevTile; }
@@ -187,7 +179,6 @@ private:
   int hValue;
   int value;
   int coords[2];
-  // int index;
   Tile *prevTile = 0;
   int prevCoords[2];
 };
