@@ -16,6 +16,7 @@ public:
   enum states {
     welcome,
     build,
+    buttonClicked,
     solving,
     solved,
     buildSolved
@@ -23,6 +24,14 @@ public:
 
   void setState(states newState, sf::RenderWindow *window) {
     if (this->state == welcome && newState == build)
+    {
+      this->state = build;
+    }
+    else if (this->state == build && newState == buttonClicked)
+    {
+      this->state = buttonClicked;
+    }
+    else if (this->state == buttonClicked && newState == build)
     {
       this->state = build;
     }
@@ -89,6 +98,11 @@ public:
         this->updateMouse();
         this->updateUI();
         this->updateTiles();
+        break;
+      case StateEngine::states::buttonClicked:
+        this->pollEvents();
+        if (!sf::Mouse::isButtonPressed(sf::Mouse::Left))
+          this->stateEngine.setState(StateEngine::build, this->window);
         break;
       case StateEngine::states::solving:
         this->pollEvents();
@@ -239,31 +253,24 @@ private:
     
     if (!this->txPlaceWalls.loadFromFile("resources/tutorial_pictures/placing_walls.png")) std::cout << "Failed to load 'placing_walls.png'";
     this->spPlaceWalls.setTexture(this->txPlaceWalls);
-    this->spPlaceWalls.setScale(sf::Vector2f(0.75, 0.75));
     this->spPlaceWalls.setPosition(9000, 9000);
     if (!this->txEraseWalls.loadFromFile("resources/tutorial_pictures/erasing_walls.png")) std::cout << "Failed to load 'erasing_walls.png'";
     this->spEraseWalls.setTexture(this->txEraseWalls);
-    this->spEraseWalls.setScale(sf::Vector2f(0.75, 0.75));
     this->spEraseWalls.setPosition(9000, 9000);
     if (!this->txMoveStartEnd.loadFromFile("resources/tutorial_pictures/moving_startandend.png")) std::cout << "Failed to load 'moving_startandend.png'";
     this->spMoveStartEnd.setTexture(this->txMoveStartEnd);
-    this->spMoveStartEnd.setScale(sf::Vector2f(0.75, 0.75));
     this->spMoveStartEnd.setPosition(9000, 9000);
     if (!this->txSolveSpeed.loadFromFile("resources/tutorial_pictures/animation_speed.png")) std::cout << "Failed to load 'animation_speed.png'";
     this->spSolveSpeed.setTexture(this->txSolveSpeed);
-    this->spSolveSpeed.setScale(sf::Vector2f(0.75, 0.75));
     this->spSolveSpeed.setPosition(9000, 9000);
     if (!this->txAlgo.loadFromFile("resources/tutorial_pictures/choose_algo.png")) std::cout << "Failed to load 'choose_algo.png'";
     this->spAlgo.setTexture(this->txAlgo);
-    this->spAlgo.setScale(sf::Vector2f(0.75, 0.75));
     this->spAlgo.setPosition(9000, 9000);
     if (!this->txSolve.loadFromFile("resources/tutorial_pictures/solve.png")) std::cout << "Failed to load 'solve.png'";
     this->spSolve.setTexture(this->txSolve);
-    this->spSolve.setScale(sf::Vector2f(0.75, 0.75));
     this->spSolve.setPosition(9000, 9000);
     if (!this->txMoveAfterSolve.loadFromFile("resources/tutorial_pictures/moving.png")) std::cout << "Failed to load 'moving.png'";
     this->spMoveAfterSolve.setTexture(this->txMoveAfterSolve);
-    this->spMoveAfterSolve.setScale(sf::Vector2f(0.75, 0.75));
     this->spMoveAfterSolve.setPosition(9000, 9000);
     
     if (!this->font.loadFromFile("resources/Roboto/Roboto-Regular.ttf")) std::cout << "Failed to load font from file";
@@ -429,10 +436,10 @@ private:
     switch (this->welcomeSlideNum)
     {
       case 1:
-        this->welcomeText.setString("Left click to place obsticles                                                Right click to remove obsticles");
+        this->welcomeText.setString("Left click to place obsticles\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nRight click to remove obsticles");
         this->welcomeText.setPosition(sf::Vector2f(25, 200));
         this->spPlaceWalls.setPosition(sf::Vector2f(100, 100));
-        this->spEraseWalls.setPosition(sf::Vector2f(500, 100));
+        this->spEraseWalls.setPosition(sf::Vector2f(100, 700));
         break;
       case 2:
         this->spPlaceWalls.setPosition(sf::Vector2f(9000, 9000));
@@ -565,6 +572,8 @@ private:
       {
         this->saveBox.setFillColor(this->colButtonClick);
         this->saveGridToFile("test_grid.txt");
+        
+        this->stateEngine.setState(StateEngine::buttonClicked, this->window);
       }
     }
     else
@@ -578,6 +587,8 @@ private:
       if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
       {
         this->algorithm = algorithms::dijkstra;
+        
+        this->stateEngine.setState(StateEngine::buttonClicked, this->window);
       }
     }
     else
@@ -591,6 +602,8 @@ private:
       if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
       {
         this->algorithm = algorithms::aStar;
+        
+        this->stateEngine.setState(StateEngine::buttonClicked, this->window);
       }
     }
     else
@@ -604,6 +617,8 @@ private:
       if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
       {
         this->algorithm = algorithms::dumby;
+        
+        this->stateEngine.setState(StateEngine::buttonClicked, this->window);
       }
     }
     else
