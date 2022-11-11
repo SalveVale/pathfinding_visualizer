@@ -287,7 +287,7 @@ private:
     
     this->welcomeContinueText.setFont(this->font);
     this->welcomeContinueText.setCharacterSize(17);
-    this->welcomeContinueText.setPosition(sf::Vector2f(500, 850));
+    this->welcomeContinueText.setPosition(sf::Vector2f(525, 950));
     this->welcomeContinueText.setString("Press Space to continue or press Escape to skip the tutorial");
     
     this->sliderText.setFont(this->font);
@@ -437,36 +437,39 @@ private:
     {
       case 1:
         this->welcomeText.setString("Left click to place obsticles\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nRight click to remove obsticles");
-        this->welcomeText.setPosition(sf::Vector2f(25, 200));
-        this->spPlaceWalls.setPosition(sf::Vector2f(100, 100));
-        this->spEraseWalls.setPosition(sf::Vector2f(100, 700));
+        this->welcomeText.setPosition(sf::Vector2f(50, 200));
+        this->spPlaceWalls.setPosition(sf::Vector2f(700, 75));
+        this->spEraseWalls.setPosition(sf::Vector2f(700, 400));
         break;
       case 2:
         this->spPlaceWalls.setPosition(sf::Vector2f(9000, 9000));
         this->spEraseWalls.setPosition(sf::Vector2f(9000, 9000));
         this->welcomeText.setString("Left click drag on the start (green) and end (red) tiles to move them");
         this->welcomeText.setPosition(sf::Vector2f(50, 200));
-        this->spMoveStartEnd.setPosition(sf::Vector2f(100, 100));
+        this->spMoveStartEnd.setPosition(sf::Vector2f(700, 100));
         break;
       case 3:
         this->spMoveStartEnd.setPosition(sf::Vector2f(9000, 9000));
+        this->welcomeText.setPosition(sf::Vector2f(75, 200));
         this->welcomeText.setString("Select speed to visualize the algorithm");
-        this->spSolveSpeed.setPosition(sf::Vector2f(100, 100));
+        this->spSolveSpeed.setPosition(sf::Vector2f(700, 100));
         break;
       case 4:
         this->spSolveSpeed.setPosition(sf::Vector2f(9000, 9000));
         this->welcomeText.setString("Choose which algorithm you want to see");
-        this->spAlgo.setPosition(sf::Vector2f(100, 100));
+        this->spAlgo.setPosition(sf::Vector2f(700, 100));
         break;
       case 5:
         this->spAlgo.setPosition(sf::Vector2f(9000, 9000));
+        this->welcomeText.setPosition(sf::Vector2f(500, 200));
         this->welcomeText.setString("Solve");
-        this->spSolve.setPosition(sf::Vector2f(100, 100));
+        this->spSolve.setPosition(sf::Vector2f(700, 100));
         break;
       case 6:
         this->spSolve.setPosition(sf::Vector2f(9000, 9000));
-        this->welcomeText.setString("Moving the start or end tiles after the solve will update the shortest path in real time");
-        this->spMoveAfterSolve.setPosition(sf::Vector2f(100, 100));
+        this->welcomeText.setPosition(sf::Vector2f(50, 200));
+        this->welcomeText.setString("Moving the start or end tiles after the solve will update\nthe shortest path in real time");
+        this->spMoveAfterSolve.setPosition(sf::Vector2f(700, 100));
         break;
     }
     if (this->welcomeSlideNum >= 7)
